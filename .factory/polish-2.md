@@ -32,5 +32,6 @@ Every finding below is resolved. The live URLs and screenshots were rechecked af
 - Final fresh local clone at `/tmp/set-note-progression-final.vaWuCm`: `npm ci` (0 vulnerabilities), all 12 commands in `claims.json`, `npm test`, `npm run build`, `npm run copy:audit`, and `npm audit --audit-level=high` all passed. The full suite ran 11 Vitest checks plus 52 Playwright checks (with the existing intentional project skips).
 - Local source verification: `git diff --check`, full test suite, build, copy audit, and the one-test-per-claim registry check passed.
 - Live verification: cold homepage, demo, privacy, terms, and real 404 were opened after deployment. The serial live suite passed all 52 Playwright checks; the accessibility subset also passed. The 390 px screenshots and the live verifier record are stored alongside this document.
+- Live mobile Lighthouse 12.8.2: performance 100, accessibility 100, best practices 100, SEO 100; LCP 1,510 ms, CLS 0, TBT 0 ms. Report: `polish-2-evidence/lighthouse-live-mobile.json`.
 
 No finding is deferred.

@@ -27,6 +27,7 @@ npm run preview
 - All 12 `claims.json` commands passed individually, including the added `@claim:license-verification-boundary` and expanded `@claim:progression-rule`.
 - Full clean-clone suite: 11 Vitest tests and 52 Playwright tests passed (the existing cross-project skips are intentional); `npm run build` produced `dist/index.html`; `npm run copy:audit` matched the checked-in audit; `npm audit --audit-level=high` passed.
 - Accessibility: the Playwright axe suite covers landing, demo, backup, privacy, terms, and 404; all serious and critical findings are zero. Keyboard dialog and 200% text checks pass.
+- Live mobile Lighthouse 12.8.2: performance 100, accessibility 100, best practices 100, SEO 100; LCP 1,510 ms, CLS 0, TBT 0 ms. Report: `.factory/polish-2-evidence/lighthouse-live-mobile.json`.
 - Offline/privacy: `@claim:offline-reload` reloads the controlled demo offline. `@claim:local-only` records no cross-origin request during a demo save. `@claim:license-verification-boundary` records a GET only to `api.sociobot.in` with only the pasted token and no body.
 - Live post-deploy verification: serial Playwright suite, 52 passed; accessibility subset passed; real 404 returns HTTP 404. Evidence and screenshots: `.factory/polish-2-evidence/`.
 
