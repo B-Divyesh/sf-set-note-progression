@@ -1,0 +1,8 @@
+{
+  "date": "2026-08-28",
+  "tool": "/opt/fleet/lib/gen-image.sh",
+  "deployment": "factory-image",
+  "size": "1536x1024",
+  "quality": "high",
+  "prompt": "Use case: stylized-concept. Asset type: landing page hero illustration. An abstract top-down barbell made from nested octagons, three grouped plate stacks, and ordered rep dots moving toward one bright next marker. Dark architectural gym floor drawn as a precision grid. Matte powder-coated steel, chalk dust, embossed rubber, translucent drafting film. Hard raking studio light with quiet shadows. Orthographic top-down editorial still life. Palette: midnight blue-black, warm bone, electric chartreuse, cyan, restrained coral. Wide landscape, visual mass on the right and clean dark negative space on the left. No people, bodies, hands, text, letters, numbers, logos, brands, gradients, glossy fitness advertising, clutter, medical imagery, watermark."
+}

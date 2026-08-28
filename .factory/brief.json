@@ -1,0 +1,10 @@
+{
+  "slug": "set-note-progression",
+  "title": "Set Note Progression",
+  "summary": "Log why each set changed and know what to do next.",
+  "artifact_class": "pwa-offline",
+  "monetization": "one-time",
+  "user": "A recreational lifter who needs to retain the reason behind each set and apply a repeatable double-progression rule next session.",
+  "smallest_useful_product": "Offline workout log with an exercise template, per-set text chips, rep ranges, and a deterministic hold/add reps/increase suggestion that always exposes its rule.",
+  "constraints": "No training or medical guarantees; local encrypted export; accessible large tap targets for in-gym use."
+}
