@@ -3,7 +3,7 @@
 Date: 2026-08-28 UTC  
 Reviewed release: `a22e45f96867dfd880f84c8bfd07280ce41c4332`  
 Review reports read: `review-1.md`, `review-2.md`, and `polish-1.md`  
-Repair commit: `ffda5cd42b073bb8bdee5f360b6d2c81c630af0a`  
+Repair commits: `ffda5cd42b073bb8bdee5f360b6d2c81c630af0a` and `1ffc560` (reset-state test stability)  
 Live URL: <https://set-note-progression.sociobot.in>
 
 Every finding below is resolved. The live URLs and screenshots were rechecked after deployment; the screenshots are in `polish-2-evidence/`.
@@ -29,8 +29,8 @@ Every finding below is resolved. The live URLs and screenshots were rechecked af
 
 ## Verification
 
-- Fresh local clone at `/tmp/set-note-progression-clean.VlA2CR`: `npm ci` (0 vulnerabilities), all 12 commands in `claims.json`, `npm test`, `npm run build`, `npm run copy:audit`, and `npm audit --audit-level=high` all passed. The full suite ran 11 Vitest checks plus 52 Playwright checks (with the existing intentional project skips).
+- Final fresh local clone at `/tmp/set-note-progression-final.vaWuCm`: `npm ci` (0 vulnerabilities), all 12 commands in `claims.json`, `npm test`, `npm run build`, `npm run copy:audit`, and `npm audit --audit-level=high` all passed. The full suite ran 11 Vitest checks plus 52 Playwright checks (with the existing intentional project skips).
 - Local source verification: `git diff --check`, full test suite, build, copy audit, and the one-test-per-claim registry check passed.
-- Live verification: cold homepage, demo, privacy, terms, and real 404 were opened after deployment. The 390 px screenshots and the live verifier record are stored alongside this document.
+- Live verification: cold homepage, demo, privacy, terms, and real 404 were opened after deployment. The serial live suite passed all 52 Playwright checks; the accessibility subset also passed. The 390 px screenshots and the live verifier record are stored alongside this document.
 
 No finding is deferred.
