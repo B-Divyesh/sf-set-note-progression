@@ -173,7 +173,45 @@ dialog::backdrop { background: rgba(5, 9, 10, .82); backdrop-filter: blur(3px); 
 }
 
 @media (max-width: 520px) {
-  body { font-size: 16px; }.demo-banner { flex-direction: column; gap: 0; align-items: flex-start; }.site-header { min-height: 120px; }.site-header nav { gap: 8px; }.network-state { font-size: .68rem; }.hero, .preview-section, .steps, .boundaries, .pricing, .app-page, .settings-page, .legal, .not-found, .site-footer { width: min(100% - 32px, 1180px); }.hero { padding-top: 24px; }.hero h1 { max-width: 100%; margin-bottom: 16px; font-size: 2.65rem; }.hero .eyebrow { margin-bottom: 14px; }.hero .lede { margin-bottom: 20px; }.hero-actions { align-items: flex-start; flex-direction: column; gap: 6px; margin-bottom: 8px; }.plain-facts { gap: 4px; margin-top: 16px; padding-top: 16px; }.specimen { position: relative; right: auto; bottom: auto; width: calc(100% - 24px); margin: -28px auto 0; }.preview-section, .steps, .boundaries, .pricing { padding: 72px 0; }.rule-board > div { grid-template-columns: 1fr; }.rule-board > div > span:last-child { grid-column: 1; }.app-page, .settings-page, .legal, .not-found { padding-top: 48px; }.app-heading { align-items: flex-start; flex-direction: column; }.exercise-switcher { grid-template-columns: 1fr; }.exercise-switcher select { width: 100%; }.exercise-actions { grid-column: 1; justify-content: flex-start; flex-wrap: wrap; }.set-row { padding: 14px 14px 18px; }.set-fields { grid-template-columns: 1fr 1fr; gap: 10px; }.rule-strip { grid-template-columns: 1fr; gap: 4px; }.action-list { grid-template-columns: 1fr; }.action-list p { min-height: auto; }.form-grid { grid-template-columns: 1fr; }.license-active { align-items: flex-start; flex-direction: column; }.site-footer nav { flex-wrap: wrap; }
+  body { font-size: 16px; }
+  .demo-banner { flex-direction: column; gap: 0; align-items: flex-start; }
+  .site-header { min-height: 120px; grid-template-columns: minmax(0, 1fr) auto; }
+  .site-header nav { flex-wrap: wrap; gap: 8px; }
+  .site-header nav a { flex: 1 1 64px; }
+  .network-state { font-size: .68rem; }
+  .hero, .preview-section, .steps, .boundaries, .pricing, .app-page, .settings-page, .legal, .not-found, .site-footer { width: calc(100% - 32px); max-width: 1180px; }
+  .hero-copy, .preview-section > *, .boundaries > *, .pricing > * { min-width: 0; }
+  h1, h2, h3, p, li, a, button, strong, span { overflow-wrap: anywhere; }
+  .hero { padding-top: 24px; }
+  .hero h1 { max-width: 100%; margin-bottom: 16px; font-size: 2.65rem; }
+  .hero .eyebrow { margin-bottom: 14px; }
+  .hero .lede { margin-bottom: 20px; }
+  .hero-actions { align-items: flex-start; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .plain-facts { gap: 4px; margin-top: 16px; padding-top: 16px; }
+  .specimen { position: relative; right: auto; bottom: auto; width: calc(100% - 24px); margin: -28px auto 0; }
+  .preview-section, .steps, .boundaries, .pricing { padding: 72px 0; }
+  .rule-board > div { grid-template-columns: 1fr; }
+  .rule-board > div > span:last-child { grid-column: 1; }
+  .app-page, .settings-page, .legal, .not-found { padding-top: 48px; }
+  .app-heading { align-items: flex-start; flex-direction: column; }
+  .demo-log { padding-top: 24px; }
+  .demo-log .app-heading { flex-direction: row; align-items: flex-end; gap: 12px; margin-bottom: 16px; }
+  .demo-log .app-heading .eyebrow { margin-bottom: 6px; }
+  .demo-log .app-heading h1 { font-size: 2.35rem; }
+  .demo-log .app-heading .button { flex: 0 0 auto; padding-inline: 14px; }
+  .demo-log .next-card { gap: 4px; margin: 16px 0 20px; padding: 16px 18px; }
+  .demo-log .next-card h2 { font-size: 2.2rem; }
+  .exercise-switcher { grid-template-columns: 1fr; }
+  .exercise-switcher select { width: 100%; }
+  .exercise-actions { grid-column: 1; justify-content: flex-start; flex-wrap: wrap; }
+  .set-row { padding: 14px 14px 18px; }
+  .set-fields { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rule-strip { grid-template-columns: 1fr; gap: 4px; }
+  .action-list { grid-template-columns: 1fr; }
+  .action-list p { min-height: auto; }
+  .form-grid { grid-template-columns: 1fr; }
+  .license-active { align-items: flex-start; flex-direction: column; }
+  .site-footer nav { flex-wrap: wrap; }
 }
 
 @media (prefers-reduced-motion: reduce) {

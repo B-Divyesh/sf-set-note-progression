@@ -35,6 +35,20 @@
     "sandbox": "seeded demo; download an encrypted file, assert its format and hidden workout text, then import it"
   },
   {
+    "id": "set-note-retention",
+    "claim": "Each rule chip and saved-only detail stays attached to its original set after reload",
+    "where": "workout log and README introduction, feature list, and rule-chip explanation",
+    "test": "npm test -- --grep @claim:set-note-retention",
+    "sandbox": "fresh demo; save distinct chips and details on three sets, reload, open the newest workout, and match every note to its set"
+  },
+  {
+    "id": "free-backup-tools",
+    "claim": "CSV export and encrypted backups are free",
+    "where": "landing pricing section",
+    "test": "npm test -- --grep @claim:free-backup-tools",
+    "sandbox": "fresh demo without a license; download a populated CSV and a valid encrypted backup"
+  },
+  {
     "id": "paid-unlimited",
     "claim": "A $19 one-time license adds unlimited exercise templates",
     "where": "landing pricing, backup page, and README",

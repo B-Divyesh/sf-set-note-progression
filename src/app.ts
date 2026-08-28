@@ -9,12 +9,13 @@ import type { Backup, EncryptedBackup, Exercise, LoggedSet, Session } from './ty
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const NOTE_TAGS = ['Clean reps', 'Paused', 'Felt easy', 'Grip slipped', 'Form broke'];
-const BUILD_ID = 'v1.0.1';
+const BUILD_ID = 'v1.0.2';
 const DEMO_SESSION_KEY = 'demo:set-note-progression:active';
 let selectedExerciseId = '';
 let editingExerciseId = '';
 let lastSuggestion: Session['suggestion'] | null = null;
 let notice = '';
+let dialogReturnAction = 'show-exercise-form';
 
 function escapeHtml(value: unknown): string {
   return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]!);
@@ -29,17 +30,51 @@ function isDemo(): boolean {
   return path() === '/demo' || new URLSearchParams(location.search).get('demo') === '1';
 }
 
-function routeTitle(route: string): string {
-  const titles: Record<string, string> = {
-    '/': 'Set Note Progression — Know what to lift next',
-    '/log': 'Workout log — Set Note Progression',
-    '/demo': 'Demo — Set Note Progression',
-    '/backup': 'Backup — Set Note Progression',
-    '/privacy': 'Privacy — Set Note Progression',
-    '/terms': 'Terms — Set Note Progression',
-    '/404': 'Page not found — Set Note Progression',
-  };
-  return titles[route] ?? titles['/404'];
+interface RouteMetadata { title: string; description: string }
+
+const routeMetadata: Record<string, RouteMetadata> = {
+  '/': {
+    title: 'Set Note Progression — Know what to lift next',
+    description: 'Log notes for every set and apply one clear double-progression rule next session.',
+  },
+  '/log': {
+    title: 'Workout log — Set Note Progression',
+    description: 'Log reps and set notes, then see the next load and the rule that produced it.',
+  },
+  '/demo': {
+    title: 'Demo — Set Note Progression',
+    description: 'Try a finished sample workout in an isolated demo and see its next-load result.',
+  },
+  '/backup': {
+    title: 'Backup — Set Note Progression',
+    description: 'Export set data as CSV or download and restore a password-encrypted workout backup.',
+  },
+  '/privacy': {
+    title: 'Privacy — Set Note Progression',
+    description: 'Read how Set Note Progression stores workout data, handles backups, and checks licenses.',
+  },
+  '/terms': {
+    title: 'Terms — Set Note Progression',
+    description: 'Read the terms for workout suggestions, local data, and the one-time exercise license.',
+  },
+  '/404': {
+    title: 'Page not found — Set Note Progression',
+    description: 'This Set Note Progression page does not exist. Return home or open the workout log.',
+  },
+};
+
+function setRouteMetadata(route: string): void {
+  const metadata = routeMetadata[route] ?? routeMetadata['/404'];
+  const canonicalPath = routeMetadata[route] ? route : '/404';
+  const canonical = `https://set-note-progression.sociobot.in${canonicalPath === '/' ? '/' : canonicalPath}`;
+  document.title = metadata.title;
+  document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = metadata.description;
+  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = canonical;
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')!.content = metadata.title;
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')!.content = metadata.description;
+  document.querySelector<HTMLMetaElement>('meta[property="og:url"]')!.content = canonical;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')!.content = metadata.title;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')!.content = metadata.description;
 }
 
 function header(demo: boolean): string {
@@ -76,12 +111,12 @@ function homePage(): string {
         <p class="eyebrow">A local workout log with one visible rule</p>
         <h1>Log each set. Know what changes next.</h1>
         <p class="lede">For lifters who forget why a set changed and want the next load decided from their notes.</p>
-        <div class="hero-actions"><a class="button primary" data-route href="/demo">Try it with sample data</a><span>See a finished workout and its next load.</span></div>
+        <div class="hero-actions"><a class="button primary" data-route href="/?demo=1">Try it with sample data</a><span>See a finished workout and its next load.</span></div>
         <a class="quiet-link" data-route href="/log">Start my workout log</a>
         <ul class="plain-facts" aria-label="Product facts">
           <li><strong>Private.</strong> Your workout log stays in this browser.</li>
           <li><strong>Offline.</strong> Reopen it after your first visit.</li>
-          <li><strong>Free core.</strong> Log three exercises. Unlimited exercises cost $19 once.</li>
+          <li><strong>Free for three exercises.</strong> Unlimited exercises cost $19 once.</li>
         </ul>
       </div>
       <div class="hero-art">
@@ -97,7 +132,7 @@ function homePage(): string {
       </div>
     </section>
     <section class="preview-section" aria-labelledby="preview-title">
-      <div><p class="section-index">01 / The rule</p><h2 id="preview-title">Your rule chips control the answer</h2><p>A missed rep and a slipped grip should not lead to the same advice. This log keeps both facts beside the set.</p></div>
+      <div><p class="section-index">Progression rule</p><h2 id="preview-title">How set notes choose the next load</h2><p>A missed rep and a slipped grip should not lead to the same advice. This log keeps both facts beside the set.</p></div>
       <div class="rule-board">
         <div><span class="rep-dots"><i></i><i></i><i></i></span><strong>Every set reaches the top</strong><span>Increase the load</span></div>
         <div><span class="rep-dots mixed"><i></i><i></i><i></i></span><strong>Sets stay inside the range</strong><span>Add reps</span></div>
@@ -105,11 +140,11 @@ function homePage(): string {
       </div>
     </section>
     <section class="steps" aria-labelledby="steps-title">
-      <p class="section-index">02 / One session</p><h2 id="steps-title">How it works</h2>
+      <p class="section-index">One workout</p><h2 id="steps-title">How it works</h2>
       <ol><li><span>1</span><div><h3>Set the rep range</h3><p>Add the exercise, working sets, load step, and rep range.</p></div></li><li><span>2</span><div><h3>Note each set</h3><p>Log reps and select a rule chip when grip or form limits a set.</p></div></li><li><span>3</span><div><h3>Read the reason</h3><p>See hold, add reps, or increase with the exact rule underneath.</p></div></li></ol>
     </section>
-    <section class="boundaries" aria-labelledby="boundaries-title"><div><p class="section-index">03 / Clear limits</p><h2 id="boundaries-title">A log, not a coach</h2></div><p>It does not create workouts, judge pain, or promise results. Stop if a movement feels unsafe and seek qualified help.</p></section>
-    <section class="pricing" aria-labelledby="pricing-title"><div><p class="section-index">04 / One-time license</p><h2 id="pricing-title">Keep three exercises free</h2><p>Every account-free logging and backup tool stays included.</p></div><div class="price-lock"><strong><span>$19</span> once</strong><p>Add unlimited exercise templates. The license works across devices when you paste it again.</p><a class="button primary" href="${checkoutUrl}">Buy unlimited exercises</a><a class="quiet-link" data-route href="/backup#license">Restore a license</a></div></section>
+    <section class="boundaries" aria-labelledby="boundaries-title"><div><p class="section-index">Product limits</p><h2 id="boundaries-title">A log, not a coach</h2></div><p>It does not create workouts, judge pain, or promise results. Stop if a movement feels unsafe and seek qualified help.</p></section>
+    <section class="pricing" aria-labelledby="pricing-title"><div><p class="section-index">Price</p><h2 id="pricing-title">Keep three exercises free</h2><p>CSV export and encrypted backups are free.</p></div><div class="price-lock"><strong><span>$19</span> once</strong><p>Add unlimited exercise templates. The license works across devices when you paste it again.</p><a class="button primary" href="${checkoutUrl}">Buy unlimited exercises</a><a class="quiet-link" data-route href="/backup#license">Restore a license</a></div></section>
   `);
 }
 
@@ -156,10 +191,10 @@ function loggerPage(exercises: Exercise[], sessions: Session[], demo: boolean): 
       <label class="note-field">Set detail <span>(saved only; does not change the rule)</span><input data-field="note" type="text" maxlength="120" placeholder="What else changed on this set?"></label>
     </fieldset>`).join('');
   const latestCard = latest ? `<section class="next-card ${latest.suggestion.decision}" aria-labelledby="next-title"><div><p>From ${new Date(latest.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p><h2 id="next-title">${escapeHtml(latest.suggestion.title)}</h2></div><p>${escapeHtml(latest.suggestion.reason)}</p></section>` : `<section class="next-card neutral" aria-labelledby="next-title"><div><p>First session</p><h2 id="next-title">Choose a starting load</h2></div><p>The app will use this session to make the next suggestion.</p></section>`;
-  return shell(`<section class="app-page">
+  return shell(`<section class="app-page${demo ? ' demo-log' : ''}">
     <div class="app-heading"><div><p class="eyebrow">${demo ? 'Sample workout log' : 'Your workout log'}</p><h1>Log today’s sets</h1></div><button class="button secondary" data-action="show-exercise-form">Add exercise</button></div>
-    <div class="exercise-switcher"><label for="exercise-select">Exercise</label><select id="exercise-select" data-action="select-exercise">${exercises.map((item) => `<option value="${item.id}" ${item.id === exercise.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select><span>${exercise.setCount} sets · ${exercise.minReps}–${exercise.maxReps} reps</span><div class="exercise-actions"><button class="text-button" data-action="edit-exercise" type="button">Edit exercise</button><button class="text-button danger" data-action="delete-exercise" type="button">Delete exercise</button></div></div>
     ${latestCard}
+    <div class="exercise-switcher"><label for="exercise-select">Exercise</label><select id="exercise-select" data-action="select-exercise">${exercises.map((item) => `<option value="${item.id}" ${item.id === exercise.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select><span>${exercise.setCount} sets · ${exercise.minReps}–${exercise.maxReps} reps</span><div class="exercise-actions"><button class="text-button" data-action="edit-exercise" type="button">Edit exercise</button><button class="text-button danger" data-action="delete-exercise" type="button">Delete exercise</button></div></div>
     <form id="session-form" class="session-form" novalidate>
       <div class="rule-strip"><strong>The rule</strong><span>${escapeHtml(ruleText(exercise))}</span></div>
       <div class="set-list">${setRows}</div>
@@ -205,8 +240,7 @@ async function render(pushFocus = false): Promise<void> {
   const route = path();
   const demo = isDemo();
   if (demo) await ensureDemoSeeded();
-  document.title = routeTitle(route);
-  document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://set-note-progression.sociobot.in${route === '/404' ? '/' : route}`;
+  setRouteMetadata(route);
   let html: string;
   if (route === '/') html = homePage();
   else if (route === '/privacy' || route === '/terms') html = legalPage(route.slice(1) as 'privacy' | 'terms', demo);
@@ -230,6 +264,10 @@ async function render(pushFocus = false): Promise<void> {
 
 async function navigate(url: string): Promise<void> {
   const target = new URL(url, location.href);
+  if (target.pathname.replace(/\/+$/, '') === '' && target.searchParams.get('demo') === '1') {
+    target.pathname = '/demo';
+    target.searchParams.delete('demo');
+  }
   const targetIsDemo = target.pathname.replace(/\/+$/, '') === '/demo' || target.searchParams.get('demo') === '1';
   const leavingDemo = isDemo() && !targetIsDemo;
   await prepareDemoNamespace(targetIsDemo);
@@ -237,7 +275,7 @@ async function navigate(url: string): Promise<void> {
     selectedExerciseId = '';
     editingExerciseId = '';
   }
-  history.pushState({}, '', url);
+  history.pushState({}, '', `${target.pathname}${target.search}${target.hash}`);
   lastSuggestion = null;
   await render(true);
 }
@@ -249,10 +287,12 @@ function bindPage(): void {
   }));
   app.querySelector('[data-action="show-exercise-form"]')?.addEventListener('click', () => void openExerciseDialog());
   app.querySelector('[data-action="edit-exercise"]')?.addEventListener('click', () => void openExerciseDialog(selectedExerciseId));
-  app.querySelector('[data-action="close-exercise-form"]')?.addEventListener('click', () => {
-    app.querySelector<HTMLDialogElement>('#exercise-dialog')?.close();
+  const exerciseDialog = app.querySelector<HTMLDialogElement>('#exercise-dialog');
+  exerciseDialog?.addEventListener('close', () => {
     editingExerciseId = '';
+    setTimeout(() => app.querySelector<HTMLElement>(`[data-action="${dialogReturnAction}"]`)?.focus());
   });
+  app.querySelector('[data-action="close-exercise-form"]')?.addEventListener('click', () => exerciseDialog?.close());
   app.querySelector<HTMLSelectElement>('[data-action="select-exercise"]')?.addEventListener('change', (event) => {
     selectedExerciseId = (event.currentTarget as HTMLSelectElement).value; lastSuggestion = null; void render();
   });
@@ -269,6 +309,7 @@ function bindPage(): void {
 }
 
 async function openExerciseDialog(id = ''): Promise<void> {
+  dialogReturnAction = id ? 'edit-exercise' : 'show-exercise-form';
   editingExerciseId = id;
   await render();
   const dialog = app.querySelector<HTMLDialogElement>('#exercise-dialog');

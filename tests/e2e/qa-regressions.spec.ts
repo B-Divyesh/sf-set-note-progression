@@ -41,6 +41,55 @@ test('cold desktop and 390px first screens show the audience, action, and three 
   }
 });
 
+test('390px demo first screen shows the complete next-load result and reason', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'chromium', 'The regression requires the exact review viewport.');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  const result = page.locator('.next-card');
+  await expect(result.getByRole('heading', { name: 'Increase to 62.5 kg' })).toBeVisible();
+  await expect(result.getByText('Increase because every set reached 12 reps with no limiting chip selected.')).toBeVisible();
+  const box = await result.boundingBox();
+  expect(box, 'the sample result should have a layout box').not.toBeNull();
+  expect(box!.y + box!.height).toBeLessThanOrEqual(844);
+});
+
+test('every application route updates its full metadata set', async ({ page }) => {
+  const routes = {
+    '/': ['Set Note Progression — Know what to lift next', 'Log notes for every set and apply one clear double-progression rule next session.'],
+    '/log': ['Workout log — Set Note Progression', 'Log reps and set notes, then see the next load and the rule that produced it.'],
+    '/demo': ['Demo — Set Note Progression', 'Try a finished sample workout in an isolated demo and see its next-load result.'],
+    '/backup': ['Backup — Set Note Progression', 'Export set data as CSV or download and restore a password-encrypted workout backup.'],
+    '/privacy': ['Privacy — Set Note Progression', 'Read how Set Note Progression stores workout data, handles backups, and checks licenses.'],
+    '/terms': ['Terms — Set Note Progression', 'Read the terms for workout suggestions, local data, and the one-time exercise license.'],
+  } as const;
+  for (const [route, [title, description]] of Object.entries(routes)) {
+    await page.goto(route);
+    const canonical = `https://set-note-progression.sociobot.in${route}`;
+    await expect(page).toHaveTitle(title);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', description);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', canonical);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', title);
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', description);
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', canonical);
+    await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', title);
+    await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', description);
+  }
+});
+
+test('SPA links, browser Back, focus, and legal links work together', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Privacy', exact: true }).first().click();
+  await expect(page).toHaveURL(/\/privacy$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  await expect(page.getByRole('link', { name: 'Terms', exact: true })).toHaveAttribute('href', '/terms');
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+});
+
 test('@claim:checkout-redirect the $19 buy action reaches Dodo Live checkout', async ({ page, request }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'One live identity probe is sufficient.');
   await page.goto('/');

@@ -15,7 +15,7 @@ The interface is intentionally single-mode. A near-black blue room lowers glare 
 | `--night` | `#10171A` | Page background |
 | `--deep` | `#172125` | Raised surface |
 | `--plate` | `#223035` | Fields and inactive geometry |
-| `--line` | `#536064` | Borders (3:1 against surfaces) |
+| `--line` | `#657276` | Borders and control outlines; 3.6:1 against the deep surface |
 | `--signal` | `#D9FF57` | Primary actions and increase state |
 | `--signal-ink` | `#11170A` | Text on signal |
 | `--sky` | `#74D7F2` | Add-reps state and focus |

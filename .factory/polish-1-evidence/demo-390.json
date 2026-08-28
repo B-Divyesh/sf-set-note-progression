@@ -1,0 +1,17 @@
+{
+  "entryUrl": "/?demo=1",
+  "resolvedUrl": "http://127.0.0.1:4173/demo",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "resultBox": {
+    "x": 16,
+    "y": 376.640625,
+    "width": 358,
+    "height": 177.75
+  },
+  "resultBottom": 554.390625,
+  "title": "Demo — Set Note Progression",
+  "banner": "Demo — sample data, nothing is saved\nReset demo\nStart for real"
+}

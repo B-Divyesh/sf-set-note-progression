@@ -1,11 +1,12 @@
 {
   "name": "set-note-progression",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "copy:audit": "UPDATE_COPY_AUDIT=1 playwright test tests/e2e/copy-audit.spec.ts --project=chromium",
     "preview": "vite preview",
     "test": "npm run test:unit && npm run test:e2e --",
     "test:unit": "vitest run",
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",
+    "@types/node": "24.3.0",
     "axe-core": "4.10.2",
     "typescript": "5.9.2",
     "vite": "7.3.6",

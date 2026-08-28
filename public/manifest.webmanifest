@@ -3,7 +3,7 @@
   "name": "Set Note Progression",
   "short_name": "Set Notes",
   "description": "Log notes for every set and apply one clear double-progression rule.",
-  "start_url": "/log?v=2",
+  "start_url": "/log?v=3",
   "scope": "/",
   "display": "standalone",
   "background_color": "#10171a",

@@ -1,4 +1,4 @@
-const VERSION = 'snp-shell-v3';
+const VERSION = 'snp-shell-v4';
 const SHELL = ['/', '/offline.html', '/offline.css', '/manifest.webmanifest', '/favicon.svg', '/art/load-constellation.webp', '/art/load-constellation-768.webp'];
 
 self.addEventListener('install', (event) => {
