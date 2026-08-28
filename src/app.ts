@@ -1,16 +1,18 @@
 import { decryptBackup, encryptBackup } from './crypto';
 import {
-  deleteSession, ensureDemoSeeded, listExercises, listSessions, makeBackup,
+  deleteExercise, deleteSession, ensureDemoSeeded, listExercises, listSessions, makeBackup,
   resetDemo, restoreBackup, saveExercise, saveSession,
 } from './db';
-import { captureLicense, checkoutUrl, hasPaidAccess, removeLicense, saveLicense, verifyLicense } from './license';
+import { captureLicense, checkoutUrl, clearDemoLicense, hasPaidAccess, removeLicense, saveLicense, verifyLicense } from './license';
 import { formatLoad, nextSuggestion, ruleText } from './progression';
 import type { Backup, EncryptedBackup, Exercise, LoggedSet, Session } from './types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const NOTE_TAGS = ['Clean reps', 'Paused', 'Felt easy', 'Grip slipped', 'Form broke'];
-const BUILD_ID = 'v1.0.0';
+const BUILD_ID = 'v1.0.1';
+const DEMO_SESSION_KEY = 'demo:set-note-progression:active';
 let selectedExerciseId = '';
+let editingExerciseId = '';
 let lastSuggestion: Session['suggestion'] | null = null;
 let notice = '';
 
@@ -46,7 +48,7 @@ function header(demo: boolean): string {
     <a class="skip-link" href="#main">Skip to main content</a>
     ${demo ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><span><button class="text-button" data-action="reset-demo">Reset demo</button><a data-route href="/log">Start for real</a></span></aside>` : ''}
     <header class="site-header">
-      <a class="wordmark" data-route href="/" aria-label="Set Note Progression home"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Set Note<br>Progression</span></a>
+      <a class="wordmark" data-route href="${demo ? '/demo' : '/'}" aria-label="Set Note Progression home"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span><span>Set Note<br>Progression</span></a>
       <nav aria-label="Main navigation">
         <a data-route href="${demo ? '/demo' : '/log'}">Log</a><a data-route href="/demo">Demo</a><a data-route href="/backup${demoSuffix}">Backup</a><a data-route href="/privacy${demoSuffix}">Privacy</a>
       </nav>
@@ -57,8 +59,8 @@ function header(demo: boolean): string {
 function footer(demo = false): string {
   const suffix = demo ? '?demo=1' : '';
   return `<footer class="site-footer">
-    <p>Set notes in. A clear next load out.</p>
-    <nav aria-label="Footer"><a data-route href="/privacy${suffix}">Privacy</a><a data-route href="/terms${suffix}">Terms</a><a href="https://paramfactory.com" target="_blank" rel="noreferrer">Built by Param Factory <span class="sr-only">(opens in a new tab)</span></a></nav>
+    <p>Log set details and get the next-load rule.</p>
+    <nav aria-label="Footer"><a data-route href="/privacy${suffix}">Privacy</a><a data-route href="/terms${suffix}">Terms</a><a href="https://hello-factory.sociobot.in/" target="_blank" rel="noreferrer">Built by Param Factory <span class="sr-only">(opens in a new tab)</span></a></nav>
     <p>${BUILD_ID} · Original generated artwork</p>
   </footer>`;
 }
@@ -90,21 +92,21 @@ function homePage(): string {
         <div class="specimen" aria-label="Example next-session suggestion">
           <span class="decision-label">Next session · increase</span>
           <strong>62.5 kg</strong>
-          <p>All 3 sets reached 12 reps. No limiting note was logged.</p>
+          <p>All 3 sets reached 12 reps. No limiting chip was selected.</p>
         </div>
       </div>
     </section>
     <section class="preview-section" aria-labelledby="preview-title">
-      <div><p class="section-index">01 / The rule</p><h2 id="preview-title">Your notes control the answer</h2><p>A missed rep and a slipped grip should not lead to the same advice. This log keeps both facts beside the set.</p></div>
+      <div><p class="section-index">01 / The rule</p><h2 id="preview-title">Your rule chips control the answer</h2><p>A missed rep and a slipped grip should not lead to the same advice. This log keeps both facts beside the set.</p></div>
       <div class="rule-board">
         <div><span class="rep-dots"><i></i><i></i><i></i></span><strong>Every set reaches the top</strong><span>Increase the load</span></div>
         <div><span class="rep-dots mixed"><i></i><i></i><i></i></span><strong>Sets stay inside the range</strong><span>Add reps</span></div>
-        <div><span class="rep-dots hold"><i></i><i></i><i></i></span><strong>A set falls short or notes a limit</strong><span>Hold the load</span></div>
+        <div><span class="rep-dots hold"><i></i><i></i><i></i></span><strong>A set falls short or has a limiting chip</strong><span>Hold the load</span></div>
       </div>
     </section>
     <section class="steps" aria-labelledby="steps-title">
       <p class="section-index">02 / One session</p><h2 id="steps-title">How it works</h2>
-      <ol><li><span>1</span><div><h3>Set the rep range</h3><p>Add the exercise, working sets, load step, and rep range.</p></div></li><li><span>2</span><div><h3>Note each set</h3><p>Log reps and tap details such as paused or grip slipped.</p></div></li><li><span>3</span><div><h3>Read the reason</h3><p>See hold, add reps, or increase with the exact rule underneath.</p></div></li></ol>
+      <ol><li><span>1</span><div><h3>Set the rep range</h3><p>Add the exercise, working sets, load step, and rep range.</p></div></li><li><span>2</span><div><h3>Note each set</h3><p>Log reps and select a rule chip when grip or form limits a set.</p></div></li><li><span>3</span><div><h3>Read the reason</h3><p>See hold, add reps, or increase with the exact rule underneath.</p></div></li></ol>
     </section>
     <section class="boundaries" aria-labelledby="boundaries-title"><div><p class="section-index">03 / Clear limits</p><h2 id="boundaries-title">A log, not a coach</h2></div><p>It does not create workouts, judge pain, or promise results. Stop if a movement feels unsafe and seek qualified help.</p></section>
     <section class="pricing" aria-labelledby="pricing-title"><div><p class="section-index">04 / One-time license</p><h2 id="pricing-title">Keep three exercises free</h2><p>Every account-free logging and backup tool stays included.</p></div><div class="price-lock"><strong><span>$19</span> once</strong><p>Add unlimited exercise templates. The license works across devices when you paste it again.</p><a class="button primary" href="${checkoutUrl}">Buy unlimited exercises</a><a class="quiet-link" data-route href="/backup#license">Restore a license</a></div></section>
@@ -130,7 +132,7 @@ function legalPage(kind: 'privacy' | 'terms', demo = false): string {
 }
 
 function notFoundPage(): string {
-  return shell(`<section class="not-found"><div class="lost-plate" aria-hidden="true">404</div><p class="eyebrow">Plate off the bar</p><h1>This page is not in the set</h1><p>The address may be old or mistyped.</p><a class="button primary" data-route href="/">Return home</a></section>`);
+  return shell(`<section class="not-found"><div class="lost-plate" aria-hidden="true">404</div><p class="eyebrow">Page not found</p><h1>This page does not exist</h1><p>The address may be old or mistyped.</p><a class="button primary" data-route href="/">Return home</a></section>`);
 }
 
 function latestFor(exercise: Exercise, sessions: Session[]): Session | undefined {
@@ -148,14 +150,15 @@ function loggerPage(exercises: Exercise[], sessions: Session[], demo: boolean): 
   const setRows = Array.from({ length: exercise.setCount }, (_, index) => `
     <fieldset class="set-row" data-set="${index}">
       <legend><span>Set ${index + 1}</span><span class="set-range">${exercise.minReps}–${exercise.maxReps} reps</span></legend>
-      <div class="set-fields"><label>Load (${exercise.unit})<input data-field="load" type="number" min="0" step="0.25" inputmode="decimal" value="${startingLoad || ''}" required></label><label>Reps<input data-field="reps" type="number" min="0" max="99" step="1" inputmode="numeric" required></label></div>
-      <div class="chips" aria-label="Set ${index + 1} notes">${NOTE_TAGS.map((tag) => `<label class="chip"><input data-field="tag" type="checkbox" value="${tag}"><span>${tag}</span></label>`).join('')}</div>
-      <label class="note-field">Set note <span>(optional)</span><input data-field="note" type="text" maxlength="120" placeholder="What changed on this set?"></label>
+      <div class="set-fields"><label>Load (${exercise.unit})<input data-field="load" type="number" min="0.25" step="0.25" inputmode="decimal" value="${startingLoad || ''}" required></label><label>Reps<input data-field="reps" type="number" min="1" max="99" step="1" inputmode="numeric" required></label></div>
+      <div class="chips" aria-label="Set ${index + 1} rule chips">${NOTE_TAGS.map((tag) => `<label class="chip"><input data-field="tag" type="checkbox" value="${tag}"><span>${tag}</span></label>`).join('')}</div>
+      <p class="chip-help">Grip slipped and Form broke hold the load.</p>
+      <label class="note-field">Set detail <span>(saved only; does not change the rule)</span><input data-field="note" type="text" maxlength="120" placeholder="What else changed on this set?"></label>
     </fieldset>`).join('');
   const latestCard = latest ? `<section class="next-card ${latest.suggestion.decision}" aria-labelledby="next-title"><div><p>From ${new Date(latest.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p><h2 id="next-title">${escapeHtml(latest.suggestion.title)}</h2></div><p>${escapeHtml(latest.suggestion.reason)}</p></section>` : `<section class="next-card neutral" aria-labelledby="next-title"><div><p>First session</p><h2 id="next-title">Choose a starting load</h2></div><p>The app will use this session to make the next suggestion.</p></section>`;
   return shell(`<section class="app-page">
     <div class="app-heading"><div><p class="eyebrow">${demo ? 'Sample workout log' : 'Your workout log'}</p><h1>Log today’s sets</h1></div><button class="button secondary" data-action="show-exercise-form">Add exercise</button></div>
-    <div class="exercise-switcher"><label for="exercise-select">Exercise</label><select id="exercise-select" data-action="select-exercise">${exercises.map((item) => `<option value="${item.id}" ${item.id === exercise.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select><span>${exercise.setCount} sets · ${exercise.minReps}–${exercise.maxReps} reps</span></div>
+    <div class="exercise-switcher"><label for="exercise-select">Exercise</label><select id="exercise-select" data-action="select-exercise">${exercises.map((item) => `<option value="${item.id}" ${item.id === exercise.id ? 'selected' : ''}>${escapeHtml(item.name)}</option>`).join('')}</select><span>${exercise.setCount} sets · ${exercise.minReps}–${exercise.maxReps} reps</span><div class="exercise-actions"><button class="text-button" data-action="edit-exercise" type="button">Edit exercise</button><button class="text-button danger" data-action="delete-exercise" type="button">Delete exercise</button></div></div>
     ${latestCard}
     <form id="session-form" class="session-form" novalidate>
       <div class="rule-strip"><strong>The rule</strong><span>${escapeHtml(ruleText(exercise))}</span></div>
@@ -165,7 +168,7 @@ function loggerPage(exercises: Exercise[], sessions: Session[], demo: boolean): 
     </form>
     ${lastSuggestion ? `<section class="result-card ${lastSuggestion.decision}" tabindex="-1" data-result><p class="eyebrow">Next session</p><h2>${escapeHtml(lastSuggestion.title)}</h2><p>${escapeHtml(lastSuggestion.reason)}</p></section>` : ''}
     ${historyView(sessions, exercise.id)}
-    ${exerciseForm()}
+    ${exerciseForm(exercises.find((item) => item.id === editingExerciseId))}
   </section>`, demo);
 }
 
@@ -178,18 +181,19 @@ function historyView(sessions: Session[], exerciseId: string): string {
     </details></li>`).join('')}</ol></section>`;
 }
 
-function exerciseForm(): string {
-  return `<dialog id="exercise-dialog" aria-labelledby="exercise-title"><form method="dialog" class="dialog-form" id="exercise-form"><div class="dialog-heading"><div><p class="eyebrow">Exercise template</p><h2 id="exercise-title">Add an exercise</h2></div><button class="icon-button" value="cancel" aria-label="Close exercise form">×</button></div>
-    <label>Exercise name<input name="name" required maxlength="60" autocomplete="off"></label>
-    <div class="form-grid"><label>Minimum reps<input name="minReps" type="number" min="1" max="50" value="8" required></label><label>Maximum reps<input name="maxReps" type="number" min="2" max="50" value="12" required></label></div>
-    <div class="form-grid"><label>Working sets<input name="setCount" type="number" min="1" max="10" value="3" required></label><label>Load increase<input name="increment" type="number" min="0.25" max="100" step="0.25" value="2.5" required></label></div>
-    <label>Unit<select name="unit"><option value="kg">Kilograms</option><option value="lb">Pounds</option></select></label>
-    <p class="form-error" data-exercise-error role="alert"></p><button class="button primary" value="default" type="submit">Save exercise</button>
+function exerciseForm(exercise?: Exercise): string {
+  const editing = Boolean(exercise);
+  return `<dialog id="exercise-dialog" aria-labelledby="exercise-title"><form class="dialog-form" id="exercise-form"><div class="dialog-heading"><div><p class="eyebrow">Exercise template</p><h2 id="exercise-title">${editing ? 'Edit exercise' : 'Add an exercise'}</h2></div><button class="icon-button" type="button" data-action="close-exercise-form" aria-label="Close exercise form">×</button></div>
+    <label>Exercise name<input name="name" required maxlength="60" autocomplete="off" value="${escapeHtml(exercise?.name ?? '')}"></label>
+    <div class="form-grid"><label>Minimum reps<input name="minReps" type="number" min="1" max="50" value="${exercise?.minReps ?? 8}" required></label><label>Maximum reps<input name="maxReps" type="number" min="2" max="50" value="${exercise?.maxReps ?? 12}" required></label></div>
+    <div class="form-grid"><label>Working sets<input name="setCount" type="number" min="1" max="10" value="${exercise?.setCount ?? 3}" required></label><label>Load increase<input name="increment" type="number" min="0.25" max="100" step="0.25" value="${exercise?.increment ?? 2.5}" required></label></div>
+    <label>Unit<select name="unit"><option value="kg" ${exercise?.unit !== 'lb' ? 'selected' : ''}>Kilograms</option><option value="lb" ${exercise?.unit === 'lb' ? 'selected' : ''}>Pounds</option></select></label>
+    <p class="form-error" data-exercise-error role="alert"></p><button class="button primary" type="submit">${editing ? 'Save changes' : 'Save exercise'}</button>
   </form></dialog>`;
 }
 
 function backupPage(demo: boolean): string {
-  const paid = hasPaidAccess();
+  const paid = hasPaidAccess(demo);
   return shell(`<section class="settings-page"><p class="eyebrow">Data control</p><h1>Back up your workout log</h1><p class="lede">Download a copy before clearing browser data or moving devices.</p>
     <section aria-labelledby="export-title"><h2 id="export-title">Export</h2><div class="action-list"><div><h3>Spreadsheet copy</h3><p>Download every saved set as a CSV file.</p><button class="button secondary" data-action="export-csv">Export CSV</button></div><div><h3>Encrypted backup</h3><p>Protect the full log with a password that never leaves this browser.</p><form data-action="encrypted-export"><label>Backup password<input name="password" type="password" minlength="8" required autocomplete="new-password"></label><button class="button secondary" type="submit">Download encrypted backup</button></form></div></div></section>
     <section aria-labelledby="import-title"><h2 id="import-title">Import</h2><p>Imported exercises and workouts are added to this ${demo ? 'demo' : 'log'}.</p><form class="import-form" data-action="import-backup"><label>Backup file<input name="file" type="file" accept="application/json,.json" required></label><label>Password <span>(only for encrypted files)</span><input name="password" type="password" autocomplete="current-password"></label><button class="button secondary" type="submit">Import backup</button></form></section>
@@ -224,30 +228,52 @@ async function render(pushFocus = false): Promise<void> {
   }
 }
 
-function navigate(url: string): void {
+async function navigate(url: string): Promise<void> {
+  const target = new URL(url, location.href);
+  const targetIsDemo = target.pathname.replace(/\/+$/, '') === '/demo' || target.searchParams.get('demo') === '1';
+  const leavingDemo = isDemo() && !targetIsDemo;
+  await prepareDemoNamespace(targetIsDemo);
+  if (leavingDemo) {
+    selectedExerciseId = '';
+    editingExerciseId = '';
+  }
   history.pushState({}, '', url);
   lastSuggestion = null;
-  void render(true);
+  await render(true);
 }
 
 function bindPage(): void {
   app.querySelectorAll<HTMLAnchorElement>('a[data-route]').forEach((link) => link.addEventListener('click', (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault(); navigate(link.pathname + link.search + link.hash);
+    event.preventDefault(); void navigate(link.pathname + link.search + link.hash);
   }));
-  app.querySelector('[data-action="show-exercise-form"]')?.addEventListener('click', () => app.querySelector<HTMLDialogElement>('#exercise-dialog')?.showModal());
+  app.querySelector('[data-action="show-exercise-form"]')?.addEventListener('click', () => void openExerciseDialog());
+  app.querySelector('[data-action="edit-exercise"]')?.addEventListener('click', () => void openExerciseDialog(selectedExerciseId));
+  app.querySelector('[data-action="close-exercise-form"]')?.addEventListener('click', () => {
+    app.querySelector<HTMLDialogElement>('#exercise-dialog')?.close();
+    editingExerciseId = '';
+  });
   app.querySelector<HTMLSelectElement>('[data-action="select-exercise"]')?.addEventListener('change', (event) => {
     selectedExerciseId = (event.currentTarget as HTMLSelectElement).value; lastSuggestion = null; void render();
   });
   app.querySelector<HTMLFormElement>('#session-form')?.addEventListener('submit', handleSessionSubmit);
   app.querySelector<HTMLFormElement>('#exercise-form')?.addEventListener('submit', handleExerciseSubmit);
   app.querySelectorAll<HTMLButtonElement>('[data-action="delete-session"]').forEach((button) => button.addEventListener('click', () => void handleDelete(button.dataset.id!)));
-  app.querySelector('[data-action="reset-demo"]')?.addEventListener('click', async () => { await resetDemo(); notice = 'Demo reset to its original sample.'; await render(); });
+  app.querySelector('[data-action="delete-exercise"]')?.addEventListener('click', () => void handleDeleteExercise());
+  app.querySelector('[data-action="reset-demo"]')?.addEventListener('click', async () => { await resetDemo(); clearDemoLicense(); notice = 'Demo reset to its original sample.'; await render(); });
   app.querySelector('[data-action="export-csv"]')?.addEventListener('click', () => void exportCsv());
   app.querySelector<HTMLFormElement>('form[data-action="encrypted-export"]')?.addEventListener('submit', handleEncryptedExport);
   app.querySelector<HTMLFormElement>('form[data-action="import-backup"]')?.addEventListener('submit', handleImport);
   app.querySelector<HTMLFormElement>('form[data-action="restore-license"]')?.addEventListener('submit', handleRestoreLicense);
-  app.querySelector('[data-action="remove-license"]')?.addEventListener('click', () => { removeLicense(); notice = 'License removed from this device.'; void render(); });
+  app.querySelector('[data-action="remove-license"]')?.addEventListener('click', () => { removeLicense(isDemo()); notice = 'License removed from this device.'; void render(); });
+}
+
+async function openExerciseDialog(id = ''): Promise<void> {
+  editingExerciseId = id;
+  await render();
+  const dialog = app.querySelector<HTMLDialogElement>('#exercise-dialog');
+  dialog?.showModal();
+  dialog?.querySelector<HTMLInputElement>('[name="name"]')?.focus();
 }
 
 async function handleExerciseSubmit(event: SubmitEvent): Promise<void> {
@@ -255,23 +281,32 @@ async function handleExerciseSubmit(event: SubmitEvent): Promise<void> {
   const form = event.currentTarget as HTMLFormElement;
   if (!form.reportValidity()) return;
   const values = new FormData(form);
+  const nameInput = form.elements.namedItem('name') as HTMLInputElement;
+  const name = String(values.get('name')).trim();
   const minReps = Number(values.get('minReps'));
   const maxReps = Number(values.get('maxReps'));
   const error = form.querySelector<HTMLElement>('[data-exercise-error]')!;
+  if (!name) {
+    error.textContent = 'Enter an exercise name with at least one visible character.';
+    nameInput.focus();
+    return;
+  }
   if (maxReps <= minReps) { error.textContent = 'Maximum reps must be higher than minimum reps. Change the rep range.'; return; }
   const exercises = await listExercises(isDemo());
-  if (exercises.length >= 3 && !hasPaidAccess()) {
+  const existing = exercises.find((item) => item.id === editingExerciseId);
+  if (!existing && exercises.length >= 3 && !hasPaidAccess(isDemo())) {
     error.innerHTML = `The free log holds three exercises. <a data-route href="/backup#license">Buy or restore unlimited exercises.</a>`;
     return;
   }
   const exercise: Exercise = {
-    id: crypto.randomUUID(), name: String(values.get('name')).trim(), minReps, maxReps,
+    id: existing?.id ?? crypto.randomUUID(), name, minReps, maxReps,
     setCount: Number(values.get('setCount')), increment: Number(values.get('increment')),
-    unit: values.get('unit') === 'lb' ? 'lb' : 'kg', createdAt: new Date().toISOString(),
+    unit: values.get('unit') === 'lb' ? 'lb' : 'kg', createdAt: existing?.createdAt ?? new Date().toISOString(),
   };
   await saveExercise(isDemo(), exercise);
   selectedExerciseId = exercise.id;
-  notice = `${exercise.name} was added.`;
+  notice = existing ? `${exercise.name} was updated.` : `${exercise.name} was added.`;
+  editingExerciseId = '';
   await render();
 }
 
@@ -281,15 +316,24 @@ async function handleSessionSubmit(event: SubmitEvent): Promise<void> {
   const exercises = await listExercises(isDemo());
   const exercise = exercises.find((item) => item.id === selectedExerciseId);
   if (!exercise) return;
+  const error = form.querySelector<HTMLElement>('[data-form-error]')!;
+  if (!form.checkValidity()) {
+    const invalid = form.querySelector<HTMLInputElement>('input:invalid');
+    error.textContent = invalid?.dataset.field === 'reps'
+      ? 'Reps must be a whole number from 1 to 99. Correct the marked set.'
+      : 'Every set needs a load above zero. Correct the marked set.';
+    invalid?.focus();
+    invalid?.reportValidity();
+    return;
+  }
   const sets: LoggedSet[] = Array.from(form.querySelectorAll<HTMLElement>('[data-set]')).map((row) => ({
     load: Number(row.querySelector<HTMLInputElement>('[data-field="load"]')?.value),
     reps: Number(row.querySelector<HTMLInputElement>('[data-field="reps"]')?.value),
     tags: Array.from(row.querySelectorAll<HTMLInputElement>('[data-field="tag"]:checked')).map((item) => item.value),
     note: row.querySelector<HTMLInputElement>('[data-field="note"]')?.value.trim() ?? '',
   }));
-  const error = form.querySelector<HTMLElement>('[data-form-error]')!;
-  if (sets.some((set) => !Number.isFinite(set.load) || set.load <= 0 || !Number.isInteger(set.reps) || set.reps <= 0)) {
-    error.textContent = 'Every set needs a load above zero and a whole rep count. Check the empty fields.';
+  if (sets.some((set) => !Number.isFinite(set.load) || set.load <= 0 || !Number.isInteger(set.reps) || set.reps <= 0 || set.reps > 99)) {
+    error.textContent = 'Every set needs a load above zero and a whole rep count from 1 to 99.';
     form.querySelector<HTMLInputElement>(':invalid, input[value=""]')?.focus(); return;
   }
   if (new Set(sets.map((set) => set.load)).size > 1) {
@@ -310,6 +354,18 @@ async function handleSessionSubmit(event: SubmitEvent): Promise<void> {
 async function handleDelete(id: string): Promise<void> {
   if (!confirm('Delete this workout? This cannot be undone.')) return;
   await deleteSession(isDemo(), id); notice = 'Workout deleted.'; await render();
+}
+
+async function handleDeleteExercise(): Promise<void> {
+  const exercise = (await listExercises(isDemo())).find((item) => item.id === selectedExerciseId);
+  if (!exercise) return;
+  if (!confirm(`Delete ${exercise.name} and all of its saved workouts? This cannot be undone.`)) return;
+  await deleteExercise(isDemo(), exercise.id);
+  selectedExerciseId = '';
+  editingExerciseId = '';
+  lastSuggestion = null;
+  notice = `${exercise.name} and its workouts were deleted.`;
+  await render();
 }
 
 function download(name: string, type: string, data: string): void {
@@ -361,10 +417,11 @@ async function handleRestoreLicense(event: SubmitEvent): Promise<void> {
   const form = event.currentTarget as HTMLFormElement;
   const token = String(new FormData(form).get('license')).trim();
   if (!token) return;
-  saveLicense(token);
-  const verdict = await verifyLicense(true);
+  const demo = isDemo();
+  saveLicense(token, demo);
+  const verdict = await verifyLicense(true, demo);
   if (verdict?.valid) { notice = 'Unlimited exercises are active on this device.'; await render(); }
-  else { removeLicense(); showToast('That license is not active. Check the token and try again.', true); }
+  else { removeLicense(demo); showToast('That license is not active. Check the token and try again.', true); }
 }
 
 function showToast(message: string, error = false): void {
@@ -381,13 +438,34 @@ function updateNetwork(): void {
   });
 }
 
+async function prepareDemoNamespace(demo: boolean): Promise<void> {
+  const active = Boolean(sessionStorage.getItem(DEMO_SESSION_KEY));
+  if (demo && !active) {
+    await resetDemo();
+    clearDemoLicense();
+    sessionStorage.setItem(DEMO_SESSION_KEY, '1');
+  } else if (!demo && active) {
+    await resetDemo();
+    clearDemoLicense();
+    sessionStorage.removeItem(DEMO_SESSION_KEY);
+  }
+}
+
 export async function startApp(): Promise<void> {
-  const captured = captureLicense();
+  const initialUrl = new URL(location.href);
+  if (path() === '/' && initialUrl.searchParams.get('demo') === '1') {
+    initialUrl.pathname = '/demo';
+    initialUrl.searchParams.delete('demo');
+    history.replaceState({}, '', `${initialUrl.pathname}${initialUrl.search}${initialUrl.hash}`);
+  }
+  const demo = isDemo();
+  await prepareDemoNamespace(demo);
+  const captured = captureLicense(demo);
   if (captured) notice = 'License saved. Checking it now.';
-  addEventListener('popstate', () => void render(true));
+  addEventListener('popstate', () => void prepareDemoNamespace(isDemo()).then(() => render(true)));
   addEventListener('online', updateNetwork); addEventListener('offline', updateNetwork);
   await render();
-  void verifyLicense().then((verdict) => {
+  void verifyLicense(false, demo).then((verdict) => {
     if (verdict && !verdict.valid) { showToast('The saved license is no longer active.', true); }
   });
 }

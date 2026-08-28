@@ -33,7 +33,7 @@ test('@claim:progression-rule notes change the next-load decision', async ({ pag
   await rows.nth(1).getByText('Grip slipped', { exact: true }).click();
   await page.getByRole('button', { name: 'Save workout and see next load' }).click();
   await expect(page.locator('[data-result]').getByRole('heading', { name: 'Hold at 62.5 kg' })).toBeVisible();
-  await expect(page.locator('[data-result]').getByText('Hold because a limiting note was logged. Repeat the load before adding reps.')).toBeVisible();
+  await expect(page.locator('[data-result]').getByText('Hold because a limiting chip was selected. Repeat the load before adding reps.')).toBeVisible();
 });
 
 test('@claim:csv-export exports one row for every saved set', async ({ page }) => {

@@ -4,6 +4,7 @@ import { sampleExercises, sampleSessions } from './sample';
 const DB_VERSION = 1;
 const REAL_DB = 'set-note-progression';
 const DEMO_DB = 'demo:set-note-progression';
+const connections = new Set<IDBDatabase>();
 
 function openDb(demo: boolean): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -14,7 +15,13 @@ function openDb(demo: boolean): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains('sessions')) db.createObjectStore('sessions', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta', { keyPath: 'key' });
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      const db = request.result;
+      connections.add(db);
+      db.addEventListener('close', () => connections.delete(db));
+      db.onversionchange = () => db.close();
+      resolve(db);
+    };
     request.onerror = () => reject(request.error ?? new Error('The local log could not be opened. Reload and try again.'));
   });
 }
@@ -31,6 +38,14 @@ async function store(demo: boolean, name: 'exercises' | 'sessions' | 'meta', mod
   return db.transaction(name, mode).objectStore(name);
 }
 
+function transactionDone(transaction: IDBTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error ?? new Error('The local change was not saved. Try again.'));
+  });
+}
+
 export async function listExercises(demo: boolean): Promise<Exercise[]> {
   return requestResult((await store(demo, 'exercises')).getAll()) as Promise<Exercise[]>;
 }
@@ -41,15 +56,42 @@ export async function listSessions(demo: boolean): Promise<Session[]> {
 }
 
 export async function saveExercise(demo: boolean, exercise: Exercise): Promise<void> {
-  await requestResult((await store(demo, 'exercises', 'readwrite')).put(exercise));
+  const target = await store(demo, 'exercises', 'readwrite');
+  const done = transactionDone(target.transaction);
+  target.put(exercise);
+  await done;
 }
 
 export async function saveSession(demo: boolean, session: Session): Promise<void> {
-  await requestResult((await store(demo, 'sessions', 'readwrite')).put(session));
+  const target = await store(demo, 'sessions', 'readwrite');
+  const done = transactionDone(target.transaction);
+  target.put(session);
+  await done;
+}
+
+export async function deleteExercise(demo: boolean, id: string): Promise<void> {
+  const db = await openDb(demo);
+  const transaction = db.transaction(['exercises', 'sessions'], 'readwrite');
+  transaction.objectStore('exercises').delete(id);
+  const sessions = transaction.objectStore('sessions');
+  const cursorRequest = sessions.openCursor();
+  cursorRequest.onsuccess = () => {
+    const cursor = cursorRequest.result;
+    if (!cursor) return;
+    if ((cursor.value as Session).exerciseId === id) cursor.delete();
+    cursor.continue();
+  };
+  await new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
 }
 
 export async function deleteSession(demo: boolean, id: string): Promise<void> {
-  await requestResult((await store(demo, 'sessions', 'readwrite')).delete(id));
+  const target = await store(demo, 'sessions', 'readwrite');
+  const done = transactionDone(target.transaction);
+  target.delete(id);
+  await done;
 }
 
 export async function ensureDemoSeeded(): Promise<void> {
@@ -68,12 +110,12 @@ export async function ensureDemoSeeded(): Promise<void> {
 }
 
 export async function resetDemo(): Promise<void> {
-  const db = await openDb(true);
-  db.close();
+  connections.forEach((db) => { if (db.name === DEMO_DB) db.close(); });
   await new Promise<void>((resolve, reject) => {
     const request = indexedDB.deleteDatabase(DEMO_DB);
     request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
+    request.onblocked = () => reject(new Error('The sample workspace is open in another tab. Close it and reset again.'));
   });
   await ensureDemoSeeded();
 }

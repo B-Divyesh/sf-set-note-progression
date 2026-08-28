@@ -1,4 +1,4 @@
-const VERSION = 'snp-shell-v2';
+const VERSION = 'snp-shell-v3';
 const SHELL = ['/', '/offline.html', '/offline.css', '/manifest.webmanifest', '/favicon.svg', '/art/load-constellation.webp', '/art/load-constellation-768.webp'];
 
 self.addEventListener('install', (event) => {
@@ -13,7 +13,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => ![VERSION, 'snp-loaded-v1'].includes(key)).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => ![VERSION, 'snp-loaded-v2'].includes(key)).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
 });
 
 self.addEventListener('message', (event) => {

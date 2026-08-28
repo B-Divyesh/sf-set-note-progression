@@ -4,14 +4,14 @@ export const LIMITING_TAGS = ['Grip slipped', 'Form broke'] as const;
 
 export function nextSuggestion(exercise: Exercise, sets: LoggedSet[]): Suggestion {
   const currentLoad = sets[0]?.load ?? 0;
-  const hasLimitingNote = sets.some((set) =>
+  const hasLimitingChip = sets.some((set) =>
     set.tags.some((tag) => LIMITING_TAGS.includes(tag as (typeof LIMITING_TAGS)[number])),
   );
   const belowRange = sets.some((set) => set.reps < exercise.minReps);
   const everySetAtTop = sets.length === exercise.setCount && sets.every((set) => set.reps >= exercise.maxReps);
 
-  if (hasLimitingNote || belowRange) {
-    const cause = hasLimitingNote ? 'a limiting note was logged' : `a set was below ${exercise.minReps} reps`;
+  if (hasLimitingChip || belowRange) {
+    const cause = hasLimitingChip ? 'a limiting chip was selected' : `a set was below ${exercise.minReps} reps`;
     return {
       decision: 'hold',
       nextLoad: currentLoad,
@@ -26,7 +26,7 @@ export function nextSuggestion(exercise: Exercise, sets: LoggedSet[]): Suggestio
       decision: 'increase',
       nextLoad,
       title: `Increase to ${formatLoad(nextLoad, exercise.unit)}`,
-      reason: `Increase because every set reached ${exercise.maxReps} reps with no limiting note.`,
+      reason: `Increase because every set reached ${exercise.maxReps} reps with no limiting chip selected.`,
     };
   }
 
@@ -39,11 +39,11 @@ export function nextSuggestion(exercise: Exercise, sets: LoggedSet[]): Suggestio
 }
 
 export function ruleText(exercise: Exercise): string {
-  return `Increase by ${formatLoad(exercise.increment, exercise.unit)} only when every set reaches ${exercise.maxReps} reps and no limiting note is logged.`;
+  return `Increase by ${formatLoad(exercise.increment, exercise.unit)} only when every set reaches ${exercise.maxReps} reps and neither Grip slipped nor Form broke is selected.`;
 }
 
 export function formatLoad(load: number, unit: string): string {
-  return `${Number.isInteger(load) ? load : load.toFixed(1)} ${unit}`;
+  return `${Number(load.toFixed(2))} ${unit}`;
 }
 
 function roundLoad(value: number): number {

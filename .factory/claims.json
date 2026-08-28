@@ -15,7 +15,7 @@
   },
   {
     "id": "progression-rule",
-    "claim": "Set notes control hold, add reps, or increase",
+    "claim": "Rep results and limiting chips control hold, add reps, or increase",
     "where": "landing rule board, workout log, and README",
     "test": "npm test -- --grep @claim:progression-rule",
     "sandbox": "demo bench session; enter top reps, add Grip slipped, and assert the result changes to hold"
@@ -40,5 +40,26 @@
     "where": "landing pricing, backup page, and README",
     "test": "npm test -- --grep @claim:paid-unlimited",
     "sandbox": "seeded demo; assert the free limit, mock a valid Sociobot verification response, then add a fourth exercise"
+  },
+  {
+    "id": "demo-isolation",
+    "claim": "Demo changes and licenses never enter the real log and are discarded when the visitor starts for real",
+    "where": "demo banner, demo documentation, and README",
+    "test": "npm test -- --grep @claim:demo-isolation",
+    "sandbox": "fresh browser context; change demo sessions, restore a mocked demo license, leave demo, and inspect both real and reseeded demo storage"
+  },
+  {
+    "id": "license-restore",
+    "claim": "A license restores access when pasted into a fresh browser store",
+    "where": "landing pricing and backup page",
+    "test": "npm test -- --grep @claim:license-restore",
+    "sandbox": "fresh browser context with an empty localStorage; mock the Sociobot valid response, paste a token, and reload"
+  },
+  {
+    "id": "checkout-redirect",
+    "claim": "The $19 buy action opens the hosted Dodo Live checkout",
+    "where": "landing pricing and backup page",
+    "test": "npm test -- --grep @claim:checkout-redirect",
+    "sandbox": "load the local landing page, assert the exact Sociobot endpoint, request it without following redirects, and require a 303 to checkout.dodopayments.com/session/"
   }
 ]

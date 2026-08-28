@@ -21,21 +21,21 @@ Count method: whitespace-separated words. Interface labels and headings are incl
 | Next session. | 2 |
 | Increase. | 1 |
 | All 3 sets reached 12 reps. | 6 |
-| No limiting note was logged. | 5 |
-| Your notes control the answer | 5 |
+| No limiting chip was selected. | 5 |
+| Your rule chips control the answer | 6 |
 | A missed rep and a slipped grip should not lead to the same advice. | 13 |
 | This log keeps both facts beside the set. | 8 |
 | Every set reaches the top | 5 |
 | Increase the load | 3 |
 | Sets stay inside the range | 5 |
 | Add reps | 2 |
-| A set falls short or notes a limit | 8 |
+| A set falls short or has a limiting chip | 9 |
 | Hold the load | 3 |
 | How it works | 3 |
 | Set the rep range | 4 |
 | Add the exercise, working sets, load step, and rep range. | 10 |
 | Note each set | 3 |
-| Log reps and tap details such as paused or grip slipped. | 10 |
+| Log reps and select a rule chip when grip or form limits a set. | 13 |
 | Read the reason | 3 |
 | See hold, add reps, or increase with the exact rule underneath. | 11 |
 | A log, not a coach | 5 |
@@ -45,8 +45,7 @@ Count method: whitespace-separated words. Interface labels and headings are incl
 | Every account-free logging and backup tool stays included. | 8 |
 | Add unlimited exercise templates. | 4 |
 | The license works across devices when you paste it again. | 10 |
-| Set notes in. | 3 |
-| A clear next load out. | 5 |
+| Log set details and get the next-load rule. | 8 |
 
 ## Terminology
 
@@ -55,7 +54,8 @@ Count method: whitespace-separated words. Interface labels and headings are incl
 | One movement setup | exercise |
 | A completed group of reps | set |
 | The lower and upper target | rep range |
-| A set detail | note |
+| Saved context that does not affect the rule | set detail |
+| A choice that affects the rule | rule chip |
 | The computed outcome | next load |
 | Temporary sample workspace | demo |
 | Downloaded data copy | backup |

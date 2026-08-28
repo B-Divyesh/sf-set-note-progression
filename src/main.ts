@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     const loadedAssets = Array.from(document.querySelectorAll<HTMLScriptElement | HTMLLinkElement>('script[src], link[rel="stylesheet"]'))
       .map((element) => element instanceof HTMLScriptElement ? element.src : element.href)
       .filter((url) => new URL(url).origin === location.origin);
-    await (await caches.open('snp-loaded-v1')).addAll(loadedAssets);
+    await (await caches.open('snp-loaded-v2')).addAll(loadedAssets);
     if (registration.waiting) notifyUpdate(registration);
     registration.addEventListener('updatefound', () => {
       const worker = registration.installing;
