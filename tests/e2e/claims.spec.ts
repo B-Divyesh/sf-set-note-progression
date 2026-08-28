@@ -39,6 +39,8 @@ test('@claim:progression-rule reps and limiting rule chips change the next-load 
   await expect(detailOnlyWorkout).toContainText('Grip slipped in writing only');
 
   await page.getByRole('button', { name: 'Reset demo' }).click();
+  await expect(page.getByText('Demo reset to its original sample.')).toBeVisible();
+  await expect(page.locator('.next-card').getByRole('heading', { name: 'Increase to 62.5 kg' })).toBeVisible();
   const chipRows = page.locator('[data-set]');
   for (let index = 0; index < 3; index += 1) await chipRows.nth(index).locator('[data-field="reps"]').fill('12');
   await chipRows.nth(1).getByText('Grip slipped', { exact: true }).click();
