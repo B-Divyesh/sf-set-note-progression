@@ -1,0 +1,99 @@
+{
+  "checkedAt": "2026-08-28T22:31:38.424Z",
+  "base": "https://set-note-progression.sociobot.in",
+  "oldLandingCopyMatches": 0,
+  "demo": {
+    "url": "https://set-note-progression.sociobot.in/demo",
+    "banner": true,
+    "reset": true,
+    "startReal": true,
+    "title": "INCREASE TO 62.5 KG",
+    "reason": "Increase because every set reached 12 reps with no limiting chip selected.",
+    "resultBottom": 554.390625,
+    "viewportBottom": 844
+  },
+  "metadata": {
+    "/": {
+      "title": "Set Note Progression — Know what to lift next",
+      "description": "Log notes for every set and apply one clear double-progression rule next session.",
+      "canonical": "https://set-note-progression.sociobot.in/",
+      "ogTitle": "Set Note Progression — Know what to lift next",
+      "ogUrl": "https://set-note-progression.sociobot.in/",
+      "twitterTitle": "Set Note Progression — Know what to lift next",
+      "h1": 1,
+      "privacy": true,
+      "terms": true
+    },
+    "/log": {
+      "title": "Workout log — Set Note Progression",
+      "description": "Log reps and set notes, then see the next load and the rule that produced it.",
+      "canonical": "https://set-note-progression.sociobot.in/log",
+      "ogTitle": "Workout log — Set Note Progression",
+      "ogUrl": "https://set-note-progression.sociobot.in/log",
+      "twitterTitle": "Workout log — Set Note Progression",
+      "h1": 1,
+      "privacy": true,
+      "terms": true
+    },
+    "/demo": {
+      "title": "Demo — Set Note Progression",
+      "description": "Try a finished sample workout in an isolated demo and see its next-load result.",
+      "canonical": "https://set-note-progression.sociobot.in/demo",
+      "ogTitle": "Demo — Set Note Progression",
+      "ogUrl": "https://set-note-progression.sociobot.in/demo",
+      "twitterTitle": "Demo — Set Note Progression",
+      "h1": 1,
+      "privacy": true,
+      "terms": true
+    },
+    "/backup": {
+      "title": "Backup — Set Note Progression",
+      "description": "Export set data as CSV or download and restore a password-encrypted workout backup.",
+      "canonical": "https://set-note-progression.sociobot.in/backup",
+      "ogTitle": "Backup — Set Note Progression",
+      "ogUrl": "https://set-note-progression.sociobot.in/backup",
+      "twitterTitle": "Backup — Set Note Progression",
+      "h1": 1,
+      "privacy": true,
+      "terms": true
+    },
+    "/privacy": {
+      "title": "Privacy — Set Note Progression",
+      "description": "Read how Set Note Progression stores workout data, handles backups, and checks licenses.",
+      "canonical": "https://set-note-progression.sociobot.in/privacy",
+      "ogTitle": "Privacy — Set Note Progression",
+      "ogUrl": "https://set-note-progression.sociobot.in/privacy",
+      "twitterTitle": "Privacy — Set Note Progression",
+      "h1": 1,
+      "privacy": true,
+      "terms": true
+    },
+    "/terms": {
+      "title": "Terms — Set Note Progression",
+      "description": "Read the terms for workout suggestions, local data, and the one-time exercise license.",
+      "canonical": "https://set-note-progression.sociobot.in/terms",
+      "ogTitle": "Terms — Set Note Progression",
+      "ogUrl": "https://set-note-progression.sociobot.in/terms",
+      "twitterTitle": "Terms — Set Note Progression",
+      "h1": 1,
+      "privacy": true,
+      "terms": true
+    }
+  },
+  "notFound": {
+    "status": 404,
+    "title": "Page not found — Set Note Progression",
+    "description": "This Set Note Progression page does not exist. Return home or open the workout log.",
+    "canonical": "https://set-note-progression.sociobot.in/404",
+    "ogTitle": "Page not found — Set Note Progression",
+    "twitterTitle": "Page not found — Set Note Progression",
+    "header": true,
+    "footer": true,
+    "h1": 1,
+    "privacy": true,
+    "terms": true,
+    "favicon": true
+  },
+  "applicationConsoleErrors": [],
+  "expectedUnknownRouteNetworkError": "The deliberate missing-page request returned HTTP 404. Chromium reports that main-resource status in its console."
+}
