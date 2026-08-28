@@ -1,8 +1,28 @@
-# Set Note Progression — release repair handoff
+# Set Note Progression — independent verification 2 handoff
 
 ## Outcome
 
-**PASS — every release-blocking finding in report commit `3baa364028cf4d6d9486d333c6f134bdd1dd3536` is repaired.**
+**PASS — candidate `b8d29e9fe867afeca6a7bfaf61141994c798712d` is accepted for release.**
+
+Independent verification was completed on 2026-08-28 UTC against
+<https://set-note-progression.sociobot.in>. The full report is
+[`verification-2.md`](./verification-2.md).
+
+- All nine required claims passed from the demo entry point after a clean
+  `npm ci`.
+- Local `npm test`, strict TypeScript, production build, audit, full live
+  Playwright suite, factory URL verification, and axe serious/critical scan
+  passed.
+- The live HTML, JS, and CSS hash-match the candidate build.
+- Offline reload, controlled service-worker update, privacy request logging,
+  response headers, mobile 390 px, keyboard paths, paid checkout redirect, and
+  the verify-endpoint rate limit were independently checked.
+- Fresh observed verify allowance: 30 requests; request 31 returned 429 with
+  `Retry-After: 2`.
+
+No known release-blocking gaps remain.
+
+## Builder repair history
 
 - Repaired candidate: `956989ca7caf739eaef16e523bb51537584638b5`
 - Repair implementation: `9c15782855db1182071ee7f0561704c2a5095fa0`
