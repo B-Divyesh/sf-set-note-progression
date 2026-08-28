@@ -1,25 +1,35 @@
-# Set Note Progression — review 2 handoff
+# Set Note Progression — polish 2 handoff
 
 ## Outcome
 
-**FAIL.** This was a read-only adversarial review. No product code or assets were changed.
+All findings from `review-1.md` and `review-2.md` are resolved in repair commit `ffda5cd42b073bb8bdee5f360b6d2c81c630af0a`.
 
-The committed review is [`review-2.md`](./review-2.md). It records one blocking first-read honesty problem and two minor unregistered live-page claims:
+The central rule is now explicit on the first screen: set details are saved, while reps and limiting rule chips choose the next load. The demo remains a one-click, isolated `/demo` workspace with a persistent banner, Reset demo, and Start for real. Privacy now has an executable license-verification boundary claim. Terms now say only what the checkout test proves.
 
-- F-2-1: the landing says “notes” choose the next load although free-text set detail is saved only and does not affect the rule.
-- F-2-2: the privacy page has an untested/unregistered statement about sending license tokens to Sociobot.
-- F-2-3: the terms page has untested/unregistered merchant, receipt, and refund statements.
+## How to run and verify
 
-## Verification completed
+```sh
+npm ci
+npm test
+npm run build
+npm run copy:audit
+npm run preview
+```
 
-- Fresh Chromium live checks at 390×844 and 1440×900: all required first-screen items fit; no console errors.
-- Live demo check: one-click sample, persistent isolation banner, complete 62.5 kg result and reason above the 390 px fold, reset/exit flow, and same-origin cold request log.
-- Clean clone: `npm ci` completed with 0 vulnerabilities; every one of the 11 commands in `.factory/claims.json` passed.
-- Clean clone quality gate: `npm test`, `npm run build`, and `npm run copy:audit` completed successfully; build produced `dist/`.
-- Live Playwright route/accessibility suite: 15 passed, including axe, 404, metadata, focus/back behavior, 44 px targets, offline, demo isolation, and checkout redirect.
-- Live link crawl: all internal links returned 200, checkout returned the expected 303, and the external factory link returned 200.
-- All findings F-1-1 through F-1-13 from review 1 remain fixed; details are in the review.
+- Local demo: <http://localhost:4173/demo>
+- Production: <https://set-note-progression.sociobot.in>
+- Every declared claim command in `.factory/claims.json` runs from the demo entry point.
 
-## Next steps
+## Exact verification evidence
 
-Implement the three concrete fixes in `review-2.md`, especially the distinction between saved set details and rule chips. Then rerun the clean-clone claim commands and the live review checklist. No deployment action was performed by this review.
+- Fresh clone: `/tmp/set-note-progression-clean.VlA2CR`.
+- `npm ci`: 60 packages audited, 0 vulnerabilities.
+- All 12 `claims.json` commands passed individually, including the added `@claim:license-verification-boundary` and expanded `@claim:progression-rule`.
+- Full clean-clone suite: 11 Vitest tests and 52 Playwright tests passed (the existing cross-project skips are intentional); `npm run build` produced `dist/index.html`; `npm run copy:audit` matched the checked-in audit; `npm audit --audit-level=high` passed.
+- Accessibility: the Playwright axe suite covers landing, demo, backup, privacy, terms, and 404; all serious and critical findings are zero. Keyboard dialog and 200% text checks pass.
+- Offline/privacy: `@claim:offline-reload` reloads the controlled demo offline. `@claim:local-only` records no cross-origin request during a demo save. `@claim:license-verification-boundary` records a GET only to `api.sociobot.in` with only the pasted token and no body.
+- Live post-deploy evidence and screenshots: `.factory/polish-2-evidence/`.
+
+## Known gaps and next steps
+
+No known product, review, accessibility, privacy, routing, or claim-test gaps remain. Deployment, DNS, and billing infrastructure remain factory-managed.
