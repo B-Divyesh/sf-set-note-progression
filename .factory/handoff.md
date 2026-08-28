@@ -1,51 +1,42 @@
-# Set Note Progression — build handoff
+# Set Note Progression — independent verification handoff
 
-## Shipped
+## Outcome
 
-- A Vite and TypeScript offline PWA with a 31.5 KB production JavaScript bundle (10.6 KB gzip) and 18.0 KB CSS bundle (4.6 KB gzip).
-- Exercise templates for sets, rep ranges, load steps, and kilograms or pounds.
-- A one-hand set logger with per-set chips, free-text notes, large controls, validation, and visible save feedback.
-- A deterministic double-progression rule with three results: hold, add reps, or increase. Every result shows its reason.
-- Local workout history in IndexedDB, including a useful empty state and confirmed deletion.
-- CSV export plus AES-GCM encrypted JSON backup and import. Password keys use PBKDF2 with 210,000 SHA-256 iterations.
-- An isolated `/demo` database with three exercises, two workouts, reset, direct entry, and a persistent demo banner.
-- Offline app-shell and route reloads through a versioned service worker. The app reports offline state and available updates.
-- A $19 one-time license path through the Sociobot checkout and verify endpoints. The free log supports three exercises; a verified license removes that limit.
-- `/privacy`, `/terms`, runtime 404, static 404, manifest, install icons, robots, sitemap, metadata, CSP, and security headers.
-- Original generated “load constellation” art, responsive WebP derivatives, a 1200×630 social image, and documented provenance.
+**FAIL — candidate `956989ca7caf739eaef16e523bb51537584638b5` must not be released.**
 
-## Verify
+Tested on 2026-08-28 UTC at <https://set-note-progression.sociobot.in>. The live HTML, application bundles, service worker, manifest, and public assets match the candidate, so the result is based on the current deployment.
+
+The complete evidence and defect list is in [.factory/verification.md](./verification.md).
+
+## Release blockers
+
+- The cold 1440×900 first screen hides the audience sentence and “Try it with sample data” below the fold.
+- The live $19 checkout endpoint returns HTTP 404: `{"error":"enabled factory product","status":404}`.
+- A permitted 0.25 kg increase is displayed incorrectly: stored `60.25`, shown `60.3 kg`.
+- A free-text `Grip slipped badly` set note can still produce an increase while the reason says no limiting note was logged.
+- Demo license actions write shared real state, and demo edits remain after **Start for real**.
+- Exercise templates cannot be edited or deleted, so mistakes can permanently consume the three free slots.
+
+Additional defects include accepting 100 reps despite `max=99`, accepting whitespace-only exercise names, a close button that leaves its dialog open, sub-44 px touch targets, unlisted public claims, 30-second caching on hashed assets, a dead external footer link, and unknown routes returning HTTP 200.
+
+## Verification performed
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
+npm audit --audit-level=high
 ```
 
-Results on 2026-08-28:
+- All six exact claim commands passed after install.
+- Full suite passed: 6 unit tests and 16 browser checks.
+- TypeScript and production build passed; `dist/` was produced.
+- Live offline reload and a controlled service-worker update passed.
+- Live request logging found no cross-origin request during the demo workout flow.
+- Axe found no WCAG A/AA violations on five routes at desktop and 390 px.
+- Live Lighthouse mobile: 99 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.2 s, TBT 100 ms, CLS 0.
+- Sociobot verify rate limiting allowed 30 requests in the observed burst; request 31 returned 429 with `Retry-After: 3`.
 
-- `npm test`: 6 unit tests and 16 browser checks passed across desktop and 390 px mobile projects.
-- Claim commands in `.factory/claims.json`: verified, including exact `npm test -- --grep …` forwarding.
-- `npm run build`: passed. `dist/index.html` exists at the deploy root.
-- Production bundle: JS 31.5 KB / 10.6 KB gzip; CSS 18.0 KB / 4.6 KB gzip; mobile hero 19.5 KB WebP.
-- Lighthouse 12.8.2, mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100. LCP 1.5 s, CLS 0, total blocking time 0 ms.
-- Lighthouse 12.8.2, desktop: all four categories 100. LCP 0.4 s, CLS 0, total blocking time 0 ms.
-- Playwright axe scan: no serious or critical findings on `/`, `/demo`, `/backup`, `/privacy`, or `/terms`.
-- Factory `verify-url.sh`: passed with no console errors, one `h1`, `lang=en`, a main landmark, alt text, and labeled buttons. Report: `.factory/evidence/verify.json`.
-- Offline: `/demo` reloaded with its sample data after `context.setOffline(true)`.
-- Visual evidence: `.factory/evidence/home-390.png` and `.factory/evidence/demo-390.png`.
-- `npm audit`: 0 vulnerabilities.
+## Handoff state
 
-## Deployment
-
-- Build command: `npm run build`
-- Static directory: `dist`
-- Demo URL: `/demo`
-- The factory must register the `set-note-progression` product at $19 before checkout goes live. The app uses the slug-based billing contract and contains no product ID or provider secret.
-
-## Known gaps and next steps
-
-- Browser storage can be cleared by the browser or user. The backup screen explains this and provides encrypted export.
-- The license check needs the factory product registration above. Failed network checks keep the last cached verdict and never block the free log.
-- No sync, generated workouts, wearables, social features, or medical guidance are included by design.
-- Pilot success still needs measurement after 20 real sessions; this build has no analytics or tracking.
+Only verification documentation and evidence were added. Product code was not modified. Repair the blockers above, add regression and claim coverage, redeploy, and request a new independent verification.
