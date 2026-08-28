@@ -23,7 +23,8 @@ test('@claim:local-only demo workout data causes no cross-origin requests', asyn
   for (let index = 0; index < 3; index += 1) await rows.nth(index).locator('[data-field="reps"]').fill('10');
   await page.getByRole('button', { name: 'Save workout and see next load' }).click();
   await expect(page.locator('[data-result]').getByRole('heading', { name: 'Add reps at 62.5 kg' })).toBeVisible();
-  expect(outgoing.filter((url) => new URL(url).origin !== 'http://127.0.0.1:4173')).toEqual([]);
+  const productOrigin = new URL(page.url()).origin;
+  expect(outgoing.filter((url) => new URL(url).origin !== productOrigin)).toEqual([]);
 });
 
 test('@claim:progression-rule notes change the next-load decision', async ({ page }) => {
