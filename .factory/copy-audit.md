@@ -17,7 +17,7 @@ Generated from the rendered landing page and README by `npm run copy:audit`. The
 | A LOCAL WORKOUT LOG WITH ONE VISIBLE RULE | 8 | — |
 | LOG EACH SET. | 3 | — |
 | KNOW WHAT CHANGES NEXT. | 4 | — |
-| For lifters who forget why a set changed and want the next load decided from their notes. | 17 | — |
+| For lifters who want to save set details and use reps and rule chips to choose the next load. | 19 | — |
 | Try it with sample data | 5 | — |
 | See a finished workout and its next load. | 8 | — |
 | Start my workout log | 4 | — |
@@ -32,7 +32,7 @@ Generated from the rendered landing page and README by `npm run copy:audit`. The
 | All 3 sets reached 12 reps. | 6 | — |
 | No limiting chip was selected. | 5 | — |
 | PROGRESSION RULE | 2 | — |
-| HOW SET NOTES CHOOSE THE NEXT LOAD | 7 | — |
+| HOW REPS AND RULE CHIPS CHOOSE THE NEXT LOAD | 9 | — |
 | A missed rep and a slipped grip should not lead to the same advice. | 14 | — |
 | This log keeps both facts beside the set. | 8 | — |
 | Every set reaches the top | 5 | — |
@@ -121,7 +121,7 @@ Generated from the rendered landing page and README by `npm run copy:audit`. The
 | Privacy and data | 3 | — |
 | Workout data stays in this browser's storage on the current device. | 11 | — |
 | No analytics, third-party scripts, or remote fonts run. | 8 | — |
-| License purchase and verification use the Sociobot billing API. | 9 | — |
+| License verification sends the pasted license token only to Sociobot. | 10 | — |
 | Paste the license on another device to restore access. | 9 | — |
 | Read /privacy and /terms in the app. | 7 | — |
 | The encrypted backup uses AES-GCM with a key derived from your password. | 12 | — |

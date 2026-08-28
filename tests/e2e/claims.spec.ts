@@ -27,11 +27,21 @@ test('@claim:local-only demo workout data causes no cross-origin requests', asyn
   expect(outgoing.filter((url) => new URL(url).origin !== productOrigin)).toEqual([]);
 });
 
-test('@claim:progression-rule notes change the next-load decision', async ({ page }) => {
+test('@claim:progression-rule reps and limiting rule chips change the next-load decision while saved-only details do not', async ({ page }) => {
   await page.goto('/demo');
   const rows = page.locator('[data-set]');
   for (let index = 0; index < 3; index += 1) await rows.nth(index).locator('[data-field="reps"]').fill('12');
-  await rows.nth(1).getByText('Grip slipped', { exact: true }).click();
+  await rows.nth(1).locator('[data-field="note"]').fill('Grip slipped in writing only');
+  await page.getByRole('button', { name: 'Save workout and see next load' }).click();
+  await expect(page.locator('[data-result]').getByRole('heading', { name: 'Increase to 65 kg' })).toBeVisible();
+  const detailOnlyWorkout = page.locator('.history details').filter({ hasText: 'Grip slipped in writing only' });
+  await detailOnlyWorkout.locator('summary').click();
+  await expect(detailOnlyWorkout).toContainText('Grip slipped in writing only');
+
+  await page.getByRole('button', { name: 'Reset demo' }).click();
+  const chipRows = page.locator('[data-set]');
+  for (let index = 0; index < 3; index += 1) await chipRows.nth(index).locator('[data-field="reps"]').fill('12');
+  await chipRows.nth(1).getByText('Grip slipped', { exact: true }).click();
   await page.getByRole('button', { name: 'Save workout and see next load' }).click();
   await expect(page.locator('[data-result]').getByRole('heading', { name: 'Hold at 62.5 kg' })).toBeVisible();
   await expect(page.locator('[data-result]').getByText('Hold because a limiting chip was selected. Repeat the load before adding reps.')).toBeVisible();

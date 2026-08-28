@@ -35,11 +35,11 @@ interface RouteMetadata { title: string; description: string }
 const routeMetadata: Record<string, RouteMetadata> = {
   '/': {
     title: 'Set Note Progression — Know what to lift next',
-    description: 'Log notes for every set and apply one clear double-progression rule next session.',
+    description: 'Save set details, then use reps and rule chips to choose the next load.',
   },
   '/log': {
     title: 'Workout log — Set Note Progression',
-    description: 'Log reps and set notes, then see the next load and the rule that produced it.',
+    description: 'Log reps and set details, then see the next load and the rule that produced it.',
   },
   '/demo': {
     title: 'Demo — Set Note Progression',
@@ -110,7 +110,7 @@ function homePage(): string {
       <div class="hero-copy">
         <p class="eyebrow">A local workout log with one visible rule</p>
         <h1>Log each set. Know what changes next.</h1>
-        <p class="lede">For lifters who forget why a set changed and want the next load decided from their notes.</p>
+        <p class="lede">For lifters who want to save set details and use reps and rule chips to choose the next load.</p>
         <div class="hero-actions"><a class="button primary" data-route href="/?demo=1">Try it with sample data</a><span>See a finished workout and its next load.</span></div>
         <a class="quiet-link" data-route href="/log">Start my workout log</a>
         <ul class="plain-facts" aria-label="Product facts">
@@ -132,7 +132,7 @@ function homePage(): string {
       </div>
     </section>
     <section class="preview-section" aria-labelledby="preview-title">
-      <div><p class="section-index">Progression rule</p><h2 id="preview-title">How set notes choose the next load</h2><p>A missed rep and a slipped grip should not lead to the same advice. This log keeps both facts beside the set.</p></div>
+      <div><p class="section-index">Progression rule</p><h2 id="preview-title">How reps and rule chips choose the next load</h2><p>A missed rep and a slipped grip should not lead to the same advice. This log keeps both facts beside the set.</p></div>
       <div class="rule-board">
         <div><span class="rep-dots"><i></i><i></i><i></i></span><strong>Every set reaches the top</strong><span>Increase the load</span></div>
         <div><span class="rep-dots mixed"><i></i><i></i><i></i></span><strong>Sets stay inside the range</strong><span>Add reps</span></div>
@@ -152,7 +152,7 @@ function legalPage(kind: 'privacy' | 'terms', demo = false): string {
   const privacy = `
     <article class="legal"><p class="eyebrow">Policy · effective 28 August 2026</p><h1>Your workout data stays on this device</h1>
     <h2>What this app stores</h2><p>Exercises, sets, notes, and settings are stored in your browser using IndexedDB. Demo data uses a separate database.</p>
-    <h2>What leaves this device</h2><p>The app does not send workout data to us. Buying or checking a license contacts Sociobot with the license token.</p>
+    <h2>What leaves this device</h2><p>The app does not send workout data to us. License verification sends the pasted license token only to Sociobot.</p>
     <h2>Backups</h2><p>You choose when to download or import a backup. Encrypted backups use your password in this browser. We cannot recover that password.</p>
     <h2>Storage control</h2><p>Removing site data in your browser deletes the local log. Export a backup first if you want to keep it.</p>
     <h2>Questions</h2><p>Email <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p></article>`;
@@ -160,7 +160,7 @@ function legalPage(kind: 'privacy' | 'terms', demo = false): string {
     <article class="legal"><p class="eyebrow">Terms · effective 28 August 2026</p><h1>Use the log as your own record</h1>
     <h2>No training or medical advice</h2><p>The progression result follows the displayed arithmetic rule. It is not medical advice or a promise of training results.</p>
     <h2>Your responsibility</h2><p>Check each entry and choose loads you can handle safely. Stop and seek qualified help if a movement feels unsafe.</p>
-    <h2>One-time license</h2><p>The $19 license adds unlimited exercise templates. Sociobot and Dodo handle payment, receipts, and refunds as merchant of record.</p>
+    <h2>One-time license</h2><p>The $19 license adds unlimited exercise templates. The Buy action opens Sociobot’s hosted Dodo checkout.</p>
     <h2>Availability</h2><p>The software is provided as available without warranties. Keep backups because browser storage can be cleared.</p>
     <h2>Questions</h2><p>Email <a href="mailto:support@sociobot.in">support@sociobot.in</a>.</p></article>`;
   return shell(kind === 'privacy' ? privacy : terms, demo);

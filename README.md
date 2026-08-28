@@ -50,7 +50,7 @@ npm run preview
 
 ## Privacy and data
 
-Workout data stays in this browser's storage on the current device. No analytics, third-party scripts, or remote fonts run. License purchase and verification use the Sociobot billing API. Paste the license on another device to restore access. Read `/privacy` and `/terms` in the app.
+Workout data stays in this browser's storage on the current device. No analytics, third-party scripts, or remote fonts run. License verification sends the pasted license token only to Sociobot. Paste the license on another device to restore access. Read `/privacy` and `/terms` in the app.
 
 The encrypted backup uses AES-GCM with a key derived from your password. The password is never stored. There is no password recovery.
 

@@ -15,8 +15,8 @@
   },
   {
     "id": "progression-rule",
-    "claim": "Rep results and limiting chips control hold, add reps, or increase",
-    "where": "landing rule board, workout log, and README",
+    "claim": "Rep results and limiting rule chips control hold, add reps, or increase; saved-only set details do not change the result",
+    "where": "landing lead and progression section, workout log, and README",
     "test": "npm test -- --grep @claim:progression-rule",
     "sandbox": "demo bench session; enter top reps, add Grip slipped, and assert the result changes to hold"
   },
@@ -68,6 +68,13 @@
     "where": "landing pricing and backup page",
     "test": "npm test -- --grep @claim:license-restore",
     "sandbox": "fresh browser context with an empty localStorage; mock the Sociobot valid response, paste a token, and reload"
+  },
+  {
+    "id": "license-verification-boundary",
+    "claim": "License verification sends the pasted license token only to Sociobot, not workout data",
+    "where": "privacy page and README",
+    "test": "npm test -- --grep @claim:license-verification-boundary",
+    "sandbox": "fresh demo context; mock the Sociobot verification endpoint, paste a fixture token, and inspect the outbound request URL and body"
   },
   {
     "id": "checkout-redirect",

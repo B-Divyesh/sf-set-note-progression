@@ -1,1 +1,1 @@
-Log each set note and see what load changes next.
+Save set details and use rule chips to choose the next load.

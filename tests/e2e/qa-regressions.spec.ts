@@ -28,6 +28,7 @@ test('cold desktop and 390px first screens show the audience, action, and three 
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
+    await expect(page.locator('.hero .lede')).toHaveText('For lifters who want to save set details and use reps and rule chips to choose the next load.');
     for (const locator of [
       page.locator('.hero .lede'),
       page.getByRole('link', { name: 'Try it with sample data' }),
@@ -39,6 +40,15 @@ test('cold desktop and 390px first screens show the audience, action, and three 
       expect(box!.y + box!.height, `content must fit within ${viewport.width}×${viewport.height}`).toBeLessThanOrEqual(viewport.height);
     }
   }
+});
+
+test('legal pages keep the tested license boundary and checkout wording', async ({ page }) => {
+  await page.goto('/privacy');
+  await expect(page.getByText('License verification sends the pasted license token only to Sociobot.')).toBeVisible();
+  await expect(page.getByText(/Buying or checking a license contacts Sociobot/)).toHaveCount(0);
+  await page.goto('/terms');
+  await expect(page.getByText('The Buy action opens Sociobot’s hosted Dodo checkout.')).toBeVisible();
+  await expect(page.getByText(/receipts, and refunds as merchant of record/)).toHaveCount(0);
 });
 
 test('390px demo first screen shows the complete next-load result and reason', async ({ page }, testInfo) => {
@@ -58,8 +68,8 @@ test('390px demo first screen shows the complete next-load result and reason', a
 
 test('every application route updates its full metadata set', async ({ page }) => {
   const routes = {
-    '/': ['Set Note Progression — Know what to lift next', 'Log notes for every set and apply one clear double-progression rule next session.'],
-    '/log': ['Workout log — Set Note Progression', 'Log reps and set notes, then see the next load and the rule that produced it.'],
+    '/': ['Set Note Progression — Know what to lift next', 'Save set details, then use reps and rule chips to choose the next load.'],
+    '/log': ['Workout log — Set Note Progression', 'Log reps and set details, then see the next load and the rule that produced it.'],
     '/demo': ['Demo — Set Note Progression', 'Try a finished sample workout in an isolated demo and see its next-load result.'],
     '/backup': ['Backup — Set Note Progression', 'Export set data as CSV or download and restore a password-encrypted workout backup.'],
     '/privacy': ['Privacy — Set Note Progression', 'Read how Set Note Progression stores workout data, handles backups, and checks licenses.'],
@@ -166,6 +176,35 @@ test('@claim:license-restore a pasted license restores access in a fresh browser
   await expect(page.getByText('Unlimited exercises are active.')).toBeVisible();
   await page.reload();
   await expect(page.getByText('Unlimited exercises are active.')).toBeVisible();
+});
+
+test('@claim:license-verification-boundary sends only the pasted license token to Sociobot', async ({ page }) => {
+  const requests: { url: string; method: string; body: string | null }[] = [];
+  await page.route('https://api.sociobot.in/api/v1/products/set-note-progression/verify?**', async (route) => {
+    const request = route.request();
+    requests.push({ url: request.url(), method: request.method(), body: request.postData() });
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ valid: true, reason: 'ok', expires_at: null }),
+    });
+  });
+  await page.goto('/demo');
+  await page.goto('/backup?demo=1#license');
+  await page.getByLabel('Have a license? Paste it here').fill('fixture-license-token');
+  await page.getByRole('button', { name: 'Verify license' }).click();
+  await expect(page.getByText('Unlimited exercises are active.')).toBeVisible();
+
+  expect(requests).toHaveLength(1);
+  const request = requests[0];
+  const url = new URL(request.url);
+  expect(url.origin).toBe('https://api.sociobot.in');
+  expect(url.pathname).toBe('/api/v1/products/set-note-progression/verify');
+  expect([...url.searchParams.entries()]).toEqual([['license', 'fixture-license-token']]);
+  expect(request.method).toBe('GET');
+  expect(request.body).toBeNull();
+  expect(request.url).not.toContain('Barbell bench press');
+  expect(request.url).not.toContain('Chest-supported row');
 });
 
 test('exercise mistakes can be closed, rejected, edited, and deleted', async ({ page }) => {
