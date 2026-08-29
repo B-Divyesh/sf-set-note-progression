@@ -1,36 +1,20 @@
-# Set Note Progression — polish 2 handoff
+# Set Note Progression — review 3 handoff
 
 ## Outcome
 
-All findings from `review-1.md` and `review-2.md` are resolved in repair commits `ffda5cd42b073bb8bdee5f360b6d2c81c630af0a` and `1ffc560`.
+Completed the requested adversarial first-read review without modifying product code. The live deployment and repository commit `451ed2ea96a511d720f4a95779210e3751c5d3a5` passed this review with zero findings.
 
-The central rule is now explicit on the first screen: set details are saved, while reps and limiting rule chips choose the next load. The demo remains a one-click, isolated `/demo` workspace with a persistent banner, Reset demo, and Start for real. Privacy now has an executable license-verification boundary claim. Terms now say only what the checkout test proves.
+## Verification
 
-## How to run and verify
+- Fresh live Chromium contexts: 390×844 and 1440×900 landing, demo, storage isolation/reset/start-for-real, metadata, routes, history/focus, unknown 404, and link crawl.
+- Clean clone: `/tmp/set-note-progression-review3.7HIv9W`; `npm ci` passed with zero vulnerabilities.
+- Ran every exact command in `.factory/claims.json`; all twelve passed.
+- `npm run build`, `npm run copy:audit`, and `git diff --check` passed in the clean clone.
 
-```sh
-npm ci
-npm test
-npm run build
-npm run copy:audit
-npm run preview
-```
+## Deliverable
 
-- Local demo: <http://localhost:4173/demo>
-- Production: <https://set-note-progression.sociobot.in>
-- Every declared claim command in `.factory/claims.json` runs from the demo entry point.
+- Added `.factory/review-3.md` with the full review, sentence-level copy audit, claims results, prior-finding confirmation, and PASS verdict.
 
-## Exact verification evidence
+## Known gaps / next steps
 
-- Final fresh clone: `/tmp/set-note-progression-final.vaWuCm`.
-- `npm ci`: 60 packages audited, 0 vulnerabilities.
-- All 12 `claims.json` commands passed individually, including the added `@claim:license-verification-boundary` and expanded `@claim:progression-rule`.
-- Full clean-clone suite: 11 Vitest tests and 52 Playwright tests passed (the existing cross-project skips are intentional); `npm run build` produced `dist/index.html`; `npm run copy:audit` matched the checked-in audit; `npm audit --audit-level=high` passed.
-- Accessibility: the Playwright axe suite covers landing, demo, backup, privacy, terms, and 404; all serious and critical findings are zero. Keyboard dialog and 200% text checks pass.
-- Live mobile Lighthouse 12.8.2: performance 100, accessibility 100, best practices 100, SEO 100; LCP 1,510 ms, CLS 0, TBT 0 ms. Report: `.factory/polish-2-evidence/lighthouse-live-mobile.json`.
-- Offline/privacy: `@claim:offline-reload` reloads the controlled demo offline. `@claim:local-only` records no cross-origin request during a demo save. `@claim:license-verification-boundary` records a GET only to `api.sociobot.in` with only the pasted token and no body.
-- Live post-deploy verification: serial Playwright suite, 52 passed; accessibility subset passed; real 404 returns HTTP 404. Evidence and screenshots: `.factory/polish-2-evidence/`.
-
-## Known gaps and next steps
-
-No known product, review, accessibility, privacy, routing, or claim-test gaps remain. Deployment, DNS, and billing infrastructure remain factory-managed.
+No review finding or untested claim remains. Continue to rerun the recorded checks for future releases.
